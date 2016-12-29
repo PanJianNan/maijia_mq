@@ -1,5 +1,7 @@
 package com.maijia.mq.producer;
 
+import java.io.IOException;
+
 /**
  * Producer
  *
@@ -13,5 +15,5 @@ public interface Producer {
      * @param msg
      * @return
      */
-    boolean produce(String queueName, Object msg);
+    boolean produce(String queueName, Object msg) throws IOException, InterruptedException;
 }

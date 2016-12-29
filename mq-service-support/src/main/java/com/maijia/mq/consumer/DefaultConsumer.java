@@ -5,6 +5,8 @@ import com.maijia.mq.domain.MessageQueue;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+
 /**
  * DefaultConsumer
  *
@@ -13,23 +15,40 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class DefaultConsumer implements Consumer {
-    public Object consume(String queueName) {
+
+    @Override
+    public Object take(String queueName) throws InterruptedException {
         if (StringUtils.isBlank(queueName)) {
             throw new IllegalArgumentException("队列名称不能为空！");
         }
 
-        MessageQueue mq = MQData.queueMap.get(queueName);
+        MessageQueue mq = MQData.QUEUE_MAP.get(queueName);
         if (mq == null) {
-//            mq = new MessageQueue();
-//            MQData.queueMap.put(queueName, mq);
-            return null;
+            mq = new MessageQueue();
+            MQData.QUEUE_MAP.put(queueName, mq);
         }
 
-        try {
-            return mq.take();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return null;
+        return mq.take();
+    }
+
+    /**
+     * 消费消息,一旦消息为空则返回null
+     *
+     * @param queueName
+     * @return
+     */
+    @Override
+    public Object poll(String queueName) throws IOException, InterruptedException {
+        if (StringUtils.isBlank(queueName)) {
+            throw new IllegalArgumentException("队列名称不能为空！");
         }
+
+        MessageQueue mq = MQData.QUEUE_MAP.get(queueName);
+        if (mq == null) {
+            mq = new MessageQueue();
+            MQData.QUEUE_MAP.put(queueName, mq);
+        }
+
+        return mq.poll();
     }
 }

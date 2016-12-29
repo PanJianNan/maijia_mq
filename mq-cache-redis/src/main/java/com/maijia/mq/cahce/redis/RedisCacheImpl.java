@@ -1,6 +1,7 @@
 package com.maijia.mq.cahce.redis;
 
 import com.maijia.mq.cache.ICacheService;
+import org.apache.log4j.Logger;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.Cursor;
@@ -26,6 +27,8 @@ import java.util.*;
 @Component
 public class RedisCacheImpl implements ICacheService {
 
+    private final Logger logger = Logger.getLogger(this.getClass());
+
     @Resource
     private RedisTemplate<String, Serializable> redisTemplate;
 
@@ -34,7 +37,7 @@ public class RedisCacheImpl implements ICacheService {
     private static final JdkSerializationRedisSerializer jdkSerializationRedisSerializer = new JdkSerializationRedisSerializer();
 
     @Override
-    public long del(final String... keys){
+    public long del(final String... keys) {
         return (long) redisTemplate.execute(new RedisCallback<Long>() {
             public Long doInRedis(RedisConnection connection) throws DataAccessException {
                 byte[][] bytes = new byte[keys.length][];
@@ -47,7 +50,7 @@ public class RedisCacheImpl implements ICacheService {
         });
     }
 
-    public void set(final byte[] key, final byte[] value, final long liveTime){
+    public void set(final byte[] key, final byte[] value, final long liveTime) {
         redisTemplate.execute(new RedisCallback<Object>() {
             public Object doInRedis(RedisConnection connection) throws DataAccessException {
                 connection.setEx(key, liveTime, value);
@@ -57,20 +60,20 @@ public class RedisCacheImpl implements ICacheService {
     }
 
     @Override
-    public void set(String key, Object value, long liveTime){
+    public void set(String key, Object value, long liveTime) {
         this.set(rawKey(key), rawValue(value), liveTime);
     }
 
-    public void set(String key, Object value){
+    public void set(String key, Object value) {
         this.set(key, value, 0L);
     }
 
-    public void set(byte[] key, byte[] value){
+    public void set(byte[] key, byte[] value) {
         this.set(key, value, 0L);
     }
 
     @Override
-    public <T> T get(final String key){
+    public <T> T get(final String key) {
         return redisTemplate.execute(new RedisCallback<T>() {
             public T doInRedis(RedisConnection connection) throws DataAccessException {
                 byte[] bs = connection.get(rawKey(key));
@@ -80,7 +83,7 @@ public class RedisCacheImpl implements ICacheService {
     }
 
     @Override
-    public Set<String> keys(final String pattern){
+    public Set<String> keys(final String pattern) {
         return redisTemplate.execute(new RedisCallback<Set<String>>() {
             public Set<String> doInRedis(RedisConnection connection) throws DataAccessException {
                 Set<byte[]> rawKeys = connection.keys(rawKey(pattern));
@@ -90,7 +93,7 @@ public class RedisCacheImpl implements ICacheService {
     }
 
     @Override
-    public List<String> scan(final String pattern, final long count){
+    public List<String> scan(final String pattern, final long count) {
         return redisTemplate.execute(new RedisCallback<List<String>>() {
             @Override
             public List<String> doInRedis(RedisConnection connection) throws DataAccessException {
@@ -102,7 +105,7 @@ public class RedisCacheImpl implements ICacheService {
                 try {
                     cursor.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.error(e.getMessage(), e);
                 }
                 return SerializationUtils.deserialize(rawKeys, stringRedisSerializer);
             }
@@ -110,7 +113,7 @@ public class RedisCacheImpl implements ICacheService {
     }
 
     @Override
-    public boolean exists(final String key){
+    public boolean exists(final String key) {
         return redisTemplate.execute(new RedisCallback<Boolean>() {
             public Boolean doInRedis(RedisConnection connection) throws DataAccessException {
                 return connection.exists(rawKey(key));
@@ -119,7 +122,7 @@ public class RedisCacheImpl implements ICacheService {
     }
 
     @Override
-    public boolean expire(final String key, final long liveTime){
+    public boolean expire(final String key, final long liveTime) {
         return redisTemplate.execute(new RedisCallback<Boolean>() {
             public Boolean doInRedis(RedisConnection connection) throws DataAccessException {
                 return connection.expire(rawKey(key), liveTime);
@@ -128,7 +131,7 @@ public class RedisCacheImpl implements ICacheService {
     }
 
     @Override
-    public long ttl(final String key){
+    public long ttl(final String key) {
         return redisTemplate.execute(new RedisCallback<Long>() {
             public Long doInRedis(RedisConnection connection) throws DataAccessException {
                 return connection.ttl(rawKey(key));
@@ -147,7 +150,7 @@ public class RedisCacheImpl implements ICacheService {
 //    }
 
     @Override
-    public long dbSize(){
+    public long dbSize() {
         return redisTemplate.execute(new RedisCallback<Long>() {
             public Long doInRedis(RedisConnection connection) throws DataAccessException {
                 return connection.dbSize();
@@ -156,7 +159,7 @@ public class RedisCacheImpl implements ICacheService {
     }
 
     @Override
-    public String ping(){
+    public String ping() {
         return redisTemplate.execute(new RedisCallback<String>() {
             public String doInRedis(RedisConnection connection) throws DataAccessException {
                 return connection.ping();
@@ -165,7 +168,7 @@ public class RedisCacheImpl implements ICacheService {
     }
 
     @Override
-    public boolean hSet(final String key, final String field, final Object value){
+    public boolean hSet(final String key, final String field, final Object value) {
         return redisTemplate.execute(new RedisCallback<Boolean>() {
             public Boolean doInRedis(RedisConnection connection) throws DataAccessException {
                 return connection.hSet(rawKey(key), rawKey(field), rawValue(value));
@@ -174,7 +177,7 @@ public class RedisCacheImpl implements ICacheService {
     }
 
     @Override
-    public <T> T hGet(final String key, final String field){
+    public <T> T hGet(final String key, final String field) {
         return redisTemplate.execute(new RedisCallback<T>() {
             public T doInRedis(RedisConnection connection) throws DataAccessException {
                 return (T) deserializeValue(connection.hGet(rawKey(key), rawKey(field)));
@@ -183,7 +186,7 @@ public class RedisCacheImpl implements ICacheService {
     }
 
     @Override
-    public Set<String> hKeys(final String key){
+    public Set<String> hKeys(final String key) {
         return redisTemplate.execute(new RedisCallback<Set<String>>() {
             public Set<String> doInRedis(RedisConnection connection) throws DataAccessException {
                 return SerializationUtils.deserialize(connection.hKeys(rawKey(key)), stringRedisSerializer);
@@ -192,7 +195,7 @@ public class RedisCacheImpl implements ICacheService {
     }
 
     @Override
-    public long hDel(final String key, final String... fields){
+    public long hDel(final String key, final String... fields) {
         return redisTemplate.execute(new RedisCallback<Long>() {
             public Long doInRedis(RedisConnection connection) throws DataAccessException {
                 byte[][] bytes = new byte[fields.length][];
@@ -206,7 +209,7 @@ public class RedisCacheImpl implements ICacheService {
     }
 
     @Override
-    public void hMSet(final String key, final Map<String, Object> hashes){
+    public void hMSet(final String key, final Map<String, Object> hashes) {
         redisTemplate.execute(new RedisCallback<Object>() {
             public Object doInRedis(RedisConnection connection) throws DataAccessException {
                 Map<byte[], byte[]> newHashes = new HashMap<byte[], byte[]>(hashes.size());
@@ -220,7 +223,7 @@ public class RedisCacheImpl implements ICacheService {
     }
 
     @Override
-    public long lPush(final String key, final Object... values){
+    public long lPush(final String key, final Object... values) {
         return redisTemplate.execute(new RedisCallback<Long>() {
             public Long doInRedis(RedisConnection connection) throws DataAccessException {
                 byte[][] bytes = new byte[values.length][];
@@ -233,8 +236,31 @@ public class RedisCacheImpl implements ICacheService {
         });
     }
 
+    /**
+     * Prepend {@code values} to {@code key}.
+     * <p/>
+     * See http://redis.io/commands/rpush
+     *
+     * @param key
+     * @param values
+     * @return
+     */
     @Override
-    public List<Object> lRange(final String key, final long begin, final long end){
+    public long rPush(final String key, final Object... values) {
+        return redisTemplate.execute(new RedisCallback<Long>() {
+            public Long doInRedis(RedisConnection connection) throws DataAccessException {
+                byte[][] bytes = new byte[values.length][];
+                int index = 0;
+                for (Object value : values) {
+                    bytes[index++] = rawValue(value);
+                }
+                return connection.rPush(rawKey(key), bytes);
+            }
+        });
+    }
+
+    @Override
+    public List<Object> lRange(final String key, final long begin, final long end) {
         return redisTemplate.execute(new RedisCallback<List<Object>>() {
             public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
                 List<byte[]> rawValues = connection.lRange(rawKey(key), begin, end);
@@ -244,7 +270,7 @@ public class RedisCacheImpl implements ICacheService {
     }
 
     @Override
-    public long lRem(final String key, final long count, final Object value){
+    public long lRem(final String key, final long count, final Object value) {
         return redisTemplate.execute(new RedisCallback<Long>() {
             public Long doInRedis(RedisConnection connection) throws DataAccessException {
                 return connection.lRem(rawKey(key), count, rawValue(value));
@@ -253,7 +279,7 @@ public class RedisCacheImpl implements ICacheService {
     }
 
     @Override
-    public void lTrim(final String key, final long begin, final long end){
+    public void lTrim(final String key, final long begin, final long end) {
         redisTemplate.execute(new RedisCallback<Object>() {
             public Object doInRedis(RedisConnection connection) throws DataAccessException {
                 connection.lTrim(rawKey(key), begin, end);
@@ -263,7 +289,7 @@ public class RedisCacheImpl implements ICacheService {
     }
 
     @Override
-    public Object lPop(final String key, final long begin, final long end){
+    public Object lPop(final String key) {
         return redisTemplate.execute(new RedisCallback<Object>() {
             public Object doInRedis(RedisConnection connection) throws DataAccessException {
                 return deserializeValue(connection.lPop(rawKey(key)));
@@ -271,8 +297,24 @@ public class RedisCacheImpl implements ICacheService {
         });
     }
 
+    /**
+     * Removes and returns first element in list stored at {@code key}.
+     * <p/>
+     * See http://redis.io/commands/rpop
+     *
+     * @param key
+     */
     @Override
-    public long lLen(final String key, final long begin, final long end){
+    public Object rPop(final String key) {
+        return redisTemplate.execute(new RedisCallback<Object>() {
+            public Object doInRedis(RedisConnection connection) throws DataAccessException {
+                return deserializeValue(connection.rPop(rawKey(key)));
+            }
+        });
+    }
+
+    @Override
+    public long lLen(final String key, final long begin, final long end) {
         return redisTemplate.execute(new RedisCallback<Long>() {
             public Long doInRedis(RedisConnection connection) throws DataAccessException {
                 return connection.lLen(rawKey(key));

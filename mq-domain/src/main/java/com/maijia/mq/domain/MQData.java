@@ -11,6 +11,6 @@ import java.util.Map;
  */
 public class MQData {
 
-    public static Map<String, MessageQueue> queueMap = new HashMap<>();
+    public static final Map<String, MessageQueue> QUEUE_MAP = new HashMap<>();
 
 }

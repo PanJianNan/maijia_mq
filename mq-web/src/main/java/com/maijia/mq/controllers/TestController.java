@@ -1,3 +1,4 @@
+/*
 package com.maijia.mq.controllers;
 
 import com.maijia.mq.cache.ICacheService;
@@ -16,12 +17,14 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+*/
 /**
  * TestController
  *
  * @author panjn
  * @date 2016/10/25
- */
+ *//*
+
 @RestController
 public class TestController {
 
@@ -65,12 +68,12 @@ public class TestController {
 
     @RequestMapping(value = "consume1")
     public String consume1() throws InterruptedException {
-        return String.valueOf(consumer.consume("pjn"));
+        return String.valueOf(consumer.take("pjn"));
     }
 
     @RequestMapping(value = "consume2")
     public String consume2() throws InterruptedException {
-        return String.valueOf(consumer.consume("pjn"));
+        return String.valueOf(consumer.take("pjn"));
     }
 
     public void newConnection() {
@@ -140,3 +143,4 @@ public class TestController {
 
     }
 }
+*/

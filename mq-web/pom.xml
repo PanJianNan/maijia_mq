@@ -18,9 +18,18 @@
     <url>http://mq.maijia.com</url>
 
     <dependencies>
-        <dependency>
+        <!--<dependency>
             <groupId>com.maijia.mq</groupId>
             <artifactId>mq-service-support</artifactId>
+        </dependency>-->
+        <!--消息队列-->
+        <dependency>
+            <groupId>com.maijia.mq</groupId>
+            <artifactId>mq-domain</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.maijia.mq</groupId>
+            <artifactId>mq-service-api</artifactId>
         </dependency>
     </dependencies>
 

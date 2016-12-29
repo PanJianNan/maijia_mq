@@ -180,6 +180,17 @@ public interface ICacheService {
     long lPush(final String key, final Object... values);
 
     /**
+     * Prepend {@code values} to {@code key}.
+     * <p/>
+     * See http://redis.io/commands/rpush
+     *
+     * @param key
+     * @param values
+     * @return
+     */
+    long rPush(final String key, final Object... values);
+
+    /**
      * Get elements between {@code begin} and {@code end} from list at {@code key}.
      * <p/>
      * See http://redis.io/commands/lrange
@@ -222,7 +233,17 @@ public interface ICacheService {
      * @param key
      * @return
      */
-    Object lPop(final String key, final long begin, final long end);
+    Object lPop(final String key);
+
+    /**
+     * Removes and returns first element in list stored at {@code key}.
+     * <p/>
+     * See http://redis.io/commands/rpop
+     *
+     * @param key
+     * @return
+     */
+    Object rPop(final String key);
 
     /**
      * Get the size of list stored at {@code key}.

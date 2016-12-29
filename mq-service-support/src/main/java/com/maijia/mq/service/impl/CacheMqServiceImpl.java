@@ -2,10 +2,10 @@ package com.maijia.mq.service.impl;
 
 import com.maijia.mq.client.Channel;
 import com.maijia.mq.client.Connection;
-import com.maijia.mq.consumer.Consumer;
+import com.maijia.mq.consumer.RedisConsumer;
 import com.maijia.mq.core.ExchangeCenter;
-import com.maijia.mq.producer.Producer;
-import com.maijia.mq.service.IMqService;
+import com.maijia.mq.producer.RedisProducer;
+import com.maijia.mq.service.ICacheMqService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -29,14 +29,14 @@ import java.util.Set;
  * @date 2016/10/26
  */
 @Service
-public class MqServiceImpl implements IMqService {
+public class CacheMqServiceImpl implements ICacheMqService {
 
     private final Logger logger = Logger.getLogger(this.getClass());
 
     @Resource
-    private Producer levelDBProducer;
+    private RedisProducer redisProducer;
     @Resource
-    private Consumer levelDBConsumer;
+    private RedisConsumer redisConsumer;
     @Resource
     private ExchangeCenter exchangeCenter;
 
@@ -44,13 +44,13 @@ public class MqServiceImpl implements IMqService {
      * 生产消息
      *
      * @param queueName 队列名称
-     * @param message   消息
+     * @param message       消息
      * @return
      */
     @Override
     public boolean produce(String queueName, Object message) throws IOException, InterruptedException {
         System.out.println("有人来下蛋了" + message);
-        return levelDBProducer.produce(queueName, message);
+        return redisProducer.produce(queueName, message);
     }
 
     /**
@@ -61,7 +61,7 @@ public class MqServiceImpl implements IMqService {
      * @return
      */
     @Override
-    public boolean produce(Channel channel, final Object message) throws IOException, InterruptedException {
+    public boolean produce(Channel channel, Object message) throws IOException, InterruptedException {
         if (channel == null) {
             throw new IllegalArgumentException("channel is NULL");
         }
@@ -74,7 +74,7 @@ public class MqServiceImpl implements IMqService {
             throw new IllegalArgumentException("message is NULL");
         }
 
-        return exchangeCenter.transmit(levelDBProducer, channel.getExchangeName(), channel.getExchangeType(), queueName, message);
+        return exchangeCenter.transmit(redisProducer, channel.getExchangeName(), channel.getExchangeType(), queueName, message);
     }
 
     /**
@@ -86,7 +86,7 @@ public class MqServiceImpl implements IMqService {
     @Override
     public Object consume(String queueName) throws IOException, InterruptedException {
         System.out.println("有人偷蛋");
-        Object obj = levelDBConsumer.poll(queueName);
+        Object obj = redisConsumer.poll(queueName);
         System.out.println(obj);
         return obj;
     }
@@ -210,7 +210,7 @@ public class MqServiceImpl implements IMqService {
 
                     if (recevice instanceof String && !"success".equals(recevice)) {
                         //返回消息
-                        Object msg = levelDBConsumer.take((String) recevice);
+                        Object msg = redisConsumer.take((String) recevice);
                         System.out.println("有货到，马上消费：" + msg);
                         //备份信息以便消费失败时回滚该消息
                         failMsgMap.put((String) recevice, msg);
@@ -234,8 +234,8 @@ public class MqServiceImpl implements IMqService {
                 logger.error(e.getMessage(), e);
             } finally {
                 try {
-                    for (Map.Entry<String, Object> entry : failMsgMap.entrySet()) {
-                        levelDBProducer.produce(entry.getKey(), entry.getValue());
+                    for (Map.Entry<String, Object> entry: failMsgMap.entrySet()) {
+                        redisProducer.produce(entry.getKey(), entry.getValue());
                     }
 
                     os.close(); //关闭Socket输出流
@@ -275,7 +275,7 @@ public class MqServiceImpl implements IMqService {
         public void run() {
             //每隔5秒进行一次心跳检测
             try {
-                int i = 0;
+                int i=0;
                 while (true) {
                     System.out.println(++i);
                     socket.sendUrgentData(0xFF);

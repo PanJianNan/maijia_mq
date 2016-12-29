@@ -1,5 +1,6 @@
-package com.maijia.mq.service;
+package com.maijia.mq.client;
 
+import com.maijia.mq.service.MQConsumer;
 import org.apache.log4j.Logger;
 
 import java.io.*;
@@ -37,6 +38,13 @@ public class Connection implements Serializable {
     }
 
     /**
+     * new channel
+     */
+    public Channel createChannel() {
+        return new Channel(host, port);
+    }
+
+    /**
      * 消费消息，采用ACK确认机制
      *
      * @param queueName
@@ -68,7 +76,7 @@ public class Connection implements Serializable {
                 os.writeObject("success");
                 System.out.println("确认消费成功");
 
-                Thread.sleep(3000);
+//                Thread.sleep(3000);
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -81,5 +89,9 @@ public class Connection implements Serializable {
                 LOGGER.error(e.getMessage(), e);
             }
         }
+    }
+
+    public void close() {
+        //todo
     }
 }

@@ -24,5 +24,9 @@
             <groupId>com.maijia.mq</groupId>
             <artifactId>mq-util</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.maijia.mq</groupId>
+            <artifactId>mq-leveldb</artifactId>
+        </dependency>
     </dependencies>
 </project>

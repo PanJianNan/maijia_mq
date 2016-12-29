@@ -5,7 +5,7 @@ import com.maijia.mq.client.Connection;
 import com.maijia.mq.consumer.Consumer;
 import com.maijia.mq.core.ExchangeCenter;
 import com.maijia.mq.producer.Producer;
-import com.maijia.mq.service.IMqService;
+import com.maijia.mq.service.IFileMqService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ import java.util.Set;
  * @date 2016/10/26
  */
 @Service
-public class MqServiceImpl implements IMqService {
+public class FileMqServiceImpl implements IFileMqService {
 
     private final Logger logger = Logger.getLogger(this.getClass());
 
@@ -44,7 +44,7 @@ public class MqServiceImpl implements IMqService {
      * 生产消息
      *
      * @param queueName 队列名称
-     * @param message   消息
+     * @param message       消息
      * @return
      */
     @Override
@@ -57,11 +57,11 @@ public class MqServiceImpl implements IMqService {
      * 生产消息
      *
      * @param channel 信道
-     * @param message 消息
+     * @param message     消息
      * @return
      */
     @Override
-    public boolean produce(Channel channel, final Object message) throws IOException, InterruptedException {
+    public boolean produce(Channel channel, Object message) throws IOException, InterruptedException {
         if (channel == null) {
             throw new IllegalArgumentException("channel is NULL");
         }
@@ -234,7 +234,7 @@ public class MqServiceImpl implements IMqService {
                 logger.error(e.getMessage(), e);
             } finally {
                 try {
-                    for (Map.Entry<String, Object> entry : failMsgMap.entrySet()) {
+                    for (Map.Entry<String, Object> entry: failMsgMap.entrySet()) {
                         levelDBProducer.produce(entry.getKey(), entry.getValue());
                     }
 
@@ -275,7 +275,7 @@ public class MqServiceImpl implements IMqService {
         public void run() {
             //每隔5秒进行一次心跳检测
             try {
-                int i = 0;
+                int i=0;
                 while (true) {
                     System.out.println(++i);
                     socket.sendUrgentData(0xFF);

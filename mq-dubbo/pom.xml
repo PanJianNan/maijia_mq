@@ -47,7 +47,7 @@
     </profiles>
 
     <build>
-        <finalName>maijia_mq</finalName>
+        <finalName>maijia_mq_dubbo</finalName>
 
         <filters>
             <filter>profiles/${env}/build.properties</filter>
