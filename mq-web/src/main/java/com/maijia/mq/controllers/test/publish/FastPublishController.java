@@ -25,7 +25,7 @@ public class FastPublishController {
     @Resource
     private IFastMqService fastMqService;
 
-    String queueName = "test.fast.publish1";
+    String queueName = "test.fast.publish1-1";
     String exchangeName = "fast.ex1";
     String host = "127.0.0.1";
 
@@ -67,7 +67,7 @@ public class FastPublishController {
         MQConsumer consumer = new DefaultMQConsumer() {
             @Override
             public void handleDelivery(Object message) {
-                System.out.println("C1 [x] Received '" + message + "'");
+                System.out.println("[fast1-1] controller Received '" + message + "'");
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
@@ -79,10 +79,7 @@ public class FastPublishController {
         //自动回复队列应答 -- 消息确认机制
         channel.basicConsume(consumer);
 
-        //如果执行到这说明连接已经断开，尝试重连MJMQ
-        System.out.println("===========尝试重连MJMQ==========");
-        socketTest();
-
+        //如果执行到这说明连接已经断开
         return "消费异常，断开连接";
     }
 
@@ -94,7 +91,7 @@ public class FastPublishController {
     }
 
     private boolean consume2() throws IOException {
-        String QUEUE_NAME = "test.fast.publish2";
+        String QUEUE_NAME = "test.fast.publish1-2";
         Connection connection = fastMqService.newConnection(host);
         Channel channel = connection.createChannel();
         channel.queueDeclare(QUEUE_NAME);
@@ -105,7 +102,7 @@ public class FastPublishController {
         MQConsumer consumer = new DefaultMQConsumer() {
             @Override
             public void handleDelivery(Object message) {
-                System.out.println("C2 [x] Received '" + message + "'");
+                System.out.println("[fast1-2] controller Received '" + message + "'");
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {

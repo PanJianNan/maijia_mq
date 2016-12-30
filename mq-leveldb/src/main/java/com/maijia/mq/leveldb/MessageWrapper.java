@@ -3,7 +3,7 @@ package com.maijia.mq.leveldb;
 import java.io.Serializable;
 
 /**
- * it wrapper message and a txn id
+ * It wrapper message and a message id
  *
  * @author panjn
  * @date 2016/12/16
@@ -12,17 +12,17 @@ public class MessageWrapper<E> implements Serializable {
 
     private static final long serialVersionUID = -8753164406257202610L;
 
-    private final String txnId;
+    private final String msgId;
 
     private final E message;
 
-    public MessageWrapper(String txnId, E message) {
-        this.txnId = txnId;
+    public MessageWrapper(String msgId, E message) {
+        this.msgId = msgId;
         this.message = message;
     }
 
-    public String getTxnId() {
-        return txnId;
+    public String getMsgId() {
+        return msgId;
     }
 
     public E getMessage() {

@@ -92,7 +92,6 @@ public class LimitReadHouseKeepingStrategy extends AbstractHouseKeepingStrategy 
                         if (logger.isDebugEnabled()) {
                             logger.debug("house keeping success. snapshot pop count:" + popCount);
                         }
-                        //System.err.println("house keeping success. snapshot pop count:" + popCount);
                     } catch (PersistenceException e) {
                         logger.error("house keeping failure", e);
                     }

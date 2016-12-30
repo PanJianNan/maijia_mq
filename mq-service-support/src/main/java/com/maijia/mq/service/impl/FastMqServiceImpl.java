@@ -2,6 +2,7 @@ package com.maijia.mq.service.impl;
 
 import com.maijia.mq.client.Channel;
 import com.maijia.mq.client.Connection;
+import com.maijia.mq.client.ExchangeType;
 import com.maijia.mq.consumer.DefaultConsumer;
 import com.maijia.mq.core.ExchangeCenter;
 import com.maijia.mq.producer.DefaultProducer;
@@ -44,7 +45,7 @@ public class FastMqServiceImpl implements IFastMqService {
      * 生产消息
      *
      * @param queueName 队列名称
-     * @param message       消息
+     * @param message   消息
      * @return
      */
     @Override
@@ -63,18 +64,20 @@ public class FastMqServiceImpl implements IFastMqService {
     @Override
     public boolean produce(Channel channel, Object message) throws IOException, InterruptedException {
         if (channel == null) {
-            throw new IllegalArgumentException("channel is NULL");
+            throw new NullPointerException("channel is NULL");
+        }
+
+        if (message == null) {
+            throw new NullPointerException("message is NULL");
         }
 
         String queueName = channel.getQueueName();
-        if (StringUtils.isBlank(queueName)) {
-            throw new IllegalArgumentException("channel'queueName is blank");
-        }
-        if (message == null) {
-            throw new IllegalArgumentException("message is NULL");
+        ExchangeType exchangeType = channel.getExchangeType();
+        if (!ExchangeType.FANOUT.equals(exchangeType) && StringUtils.isBlank(queueName)) {
+            throw new IllegalArgumentException("channel's queueName must be not blank when exchangeType isn't fanout");
         }
 
-        return exchangeCenter.transmit(defaultProducer, channel.getExchangeName(), channel.getExchangeType(), queueName, message);
+        return exchangeCenter.transmit(defaultProducer, channel.getExchangeName(), exchangeType, queueName, message);
     }
 
     /**
@@ -234,7 +237,7 @@ public class FastMqServiceImpl implements IFastMqService {
                 logger.error(e.getMessage(), e);
             } finally {
                 try {
-                    for (Map.Entry<String, Object> entry: failMsgMap.entrySet()) {
+                    for (Map.Entry<String, Object> entry : failMsgMap.entrySet()) {
                         defaultProducer.produce(entry.getKey(), entry.getValue());
                     }
 
@@ -275,7 +278,7 @@ public class FastMqServiceImpl implements IFastMqService {
         public void run() {
             //每隔5秒进行一次心跳检测
             try {
-                int i=0;
+                int i = 0;
                 while (true) {
                     System.out.println(++i);
                     socket.sendUrgentData(0xFF);

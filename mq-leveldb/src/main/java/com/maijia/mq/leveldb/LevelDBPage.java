@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * it store a page which include some indexes and page no
+ * It store a page which include some indexes and page no
  *
  * @author panjn
  * @date 2016/12/12

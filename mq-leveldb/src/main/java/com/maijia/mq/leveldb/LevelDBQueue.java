@@ -339,14 +339,14 @@ public class LevelDBQueue<E> {
             return null;
         }
 
-        Object evt = null;
+        Object msg = null;
         try {
-            evt = adapter.pop();
+            msg = adapter.pop();
         } catch (PersistenceException e) {
             logger.error("pop message error", e);
         }
-        if (evt != null)
-            return evt;
+        if (msg != null)
+            return msg;
 
         final Object locker = this.locker;
         synchronized (locker) {
@@ -361,19 +361,20 @@ public class LevelDBQueue<E> {
             }
         }
 
-        if (timeout == -1L)
+        if (timeout == -1L) {
             return transfer(timeout);
+        }
 
         if (!isOpen)
             return null;
 
         try {
-            evt = adapter.pop();
+            msg = adapter.pop();
         } catch (PersistenceException e) {
             logger.error("pop message error", e);
         }
 
-        return evt;
+        return msg;
     }
 
     public int enqueueSize() {

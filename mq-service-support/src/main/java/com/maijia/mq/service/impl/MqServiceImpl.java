@@ -2,6 +2,7 @@ package com.maijia.mq.service.impl;
 
 import com.maijia.mq.client.Channel;
 import com.maijia.mq.client.Connection;
+import com.maijia.mq.client.ExchangeType;
 import com.maijia.mq.consumer.Consumer;
 import com.maijia.mq.core.ExchangeCenter;
 import com.maijia.mq.producer.Producer;
@@ -63,18 +64,20 @@ public class MqServiceImpl implements IMqService {
     @Override
     public boolean produce(Channel channel, final Object message) throws IOException, InterruptedException {
         if (channel == null) {
-            throw new IllegalArgumentException("channel is NULL");
+            throw new NullPointerException("channel is NULL");
+        }
+
+        if (message == null) {
+            throw new NullPointerException("message is NULL");
         }
 
         String queueName = channel.getQueueName();
-        if (StringUtils.isBlank(queueName)) {
-            throw new IllegalArgumentException("channel'queueName is blank");
-        }
-        if (message == null) {
-            throw new IllegalArgumentException("message is NULL");
+        ExchangeType exchangeType = channel.getExchangeType();
+        if (!ExchangeType.FANOUT.equals(exchangeType) && StringUtils.isBlank(queueName)) {
+            throw new IllegalArgumentException("channel's queueName must be not blank when exchangeType isn't fanout");
         }
 
-        return exchangeCenter.transmit(levelDBProducer, channel.getExchangeName(), channel.getExchangeType(), queueName, message);
+        return exchangeCenter.transmit(levelDBProducer, channel.getExchangeName(), exchangeType, queueName, message);
     }
 
     /**

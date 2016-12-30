@@ -89,14 +89,27 @@ public class Channel implements Serializable {
      * @throws InterruptedException
      */
     public void basicPublish(Object message) throws IOException, InterruptedException {
-        if (StringUtils.isBlank(queueName)) {
-            throw new IllegalArgumentException("please declare target queue'name by method queueDeclare(String queueName) first");
+        if (message == null) {
+            throw new NullPointerException("message is NULL");
         }
         if (mqService == null) {
             throw new IllegalArgumentException("please set mqService first");
         }
-        //register exchange
-        mqService.registerExchange(exchangeName, queueName);
+
+        if (ExchangeType.FANOUT.equals(exchangeType)) {
+            mqService.produce(this, message);
+            return;
+        }
+
+        if (StringUtils.isBlank(queueName)) {
+            throw new IllegalArgumentException("please declare target queue's name by method queueDeclare(String queueName) first");
+        }
+
+        if (ExchangeType.DIRECT.equals(exchangeType)) {
+            //register exchange
+            mqService.registerExchange(exchangeName, queueName);
+        }
+
         mqService.produce(this, message);
     }
 
@@ -107,7 +120,7 @@ public class Channel implements Serializable {
      */
     public void basicConsume(MQConsumer consumer) {
         if (StringUtils.isBlank(queueName)) {
-            throw new IllegalArgumentException("please declare target queue'name by method queueDeclare(String queueName) first");
+            throw new IllegalArgumentException("please declare target queue's name by method queueDeclare(String queueName) first");
         }
         if (mqService == null) {
             throw new IllegalArgumentException("please set mqService first");

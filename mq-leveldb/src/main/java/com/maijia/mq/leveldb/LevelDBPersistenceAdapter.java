@@ -208,19 +208,19 @@ public class LevelDBPersistenceAdapter implements Closeable {
     }
 
     /**
-     * 存储的key使用的是txnId，value为txn的字节流
+     * 存储的key使用的是msgId，value为message的字节流
      *
-     * @return 返回的是txnId
+     * @return 返回的是msgId
      * @throws PersistenceException
      */
-    public String save(Object evt)
+    public String save(Object message)
             throws PersistenceException {
-        MessageWrapper wrapper = new MessageWrapper(nextId(), evt);
-        put(wrapper.getTxnId(), wrapper);
+        MessageWrapper wrapper = new MessageWrapper(nextId(), message);
+        put(wrapper.getMsgId(), wrapper);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(new StringBuilder("saved evt:").append(wrapper.getTxnId()));
+            LOGGER.debug(new StringBuilder("saved evt:").append(wrapper.getMsgId()));
         }
-        return wrapper.getTxnId();
+        return wrapper.getMsgId();
     }
 
     public void houseKeeping() throws PersistenceException {
@@ -236,16 +236,24 @@ public class LevelDBPersistenceAdapter implements Closeable {
     }
 
     /**
-     * @throws PersistenceException 由于LevelDB不支持分页，所以每次取batchSize容量
-     * @throws
+     * 由于LevelDB不支持分页，所以每次取batchSize容量
+     *
+     * @param batchSize
+     * @throws PersistenceException
      */
-    public List<MessageWrapper> list(int batchSize)
-            throws PersistenceException {
+    public List<MessageWrapper> list(int batchSize) throws PersistenceException {
         DBIterator iterator = db.iterator();
         iterator.seekToFirst();
         return list(batchSize, iterator);
     }
 
+    /**
+     * Get an object from leveldb
+     *
+     * @param key
+     * @param type
+     * @throws PersistenceException
+     */
     public <T> T get(String key, Class<T> type) throws PersistenceException {
         try {
             Serializable value = SerializeUtils.unserialize(db.get(key.getBytes()));
@@ -288,8 +296,8 @@ public class LevelDBPersistenceAdapter implements Closeable {
     public void deleteById(String[] ids) throws PersistenceException {
         WriteBatch wb = db.createWriteBatch();
         try {
-            for (String txnId : ids) {
-                wb.delete(txnId.getBytes());
+            for (String msgId : ids) {
+                wb.delete(msgId.getBytes());
             }
             db.write(wb);
         } finally {
@@ -301,10 +309,17 @@ public class LevelDBPersistenceAdapter implements Closeable {
         }
     }
 
-    protected void deleteById(String txnId) {
-        db.delete(txnId.getBytes());
+    protected void deleteById(String msgId) {
+        db.delete(msgId.getBytes());
     }
 
+    /**
+     * Inserts the serializable object into the leveldb
+     *
+     * @param key
+     * @param ser
+     * @throws PersistenceException
+     */
     protected void put(String key, Serializable ser) throws PersistenceException {
         try {
             db.put(key.getBytes(), SerializeUtils.serialize(ser));
@@ -313,15 +328,27 @@ public class LevelDBPersistenceAdapter implements Closeable {
         }
     }
 
-    protected void put(String key, Serializable ser, WriteBatch update) throws IOException {
-        update.put(key.getBytes(), SerializeUtils.serialize(ser));
+    /**
+     * Batch inserts the serializable object into the leveldb
+     * 先将所有的操作记录下来，然后再一起操作。
+     *
+     * @param key
+     * @param ser
+     * @throws PersistenceException
+     */
+    protected void put(String key, Serializable ser, WriteBatch update) throws PersistenceException {
+        try {
+            update.put(key.getBytes(), SerializeUtils.serialize(ser));
+        } catch (Exception e) {
+            throw new PersistenceException(e);
+        }
     }
 
     String[] toIds(List<MessageWrapper> list) {
         String[] ids = new String[list.size()];
         int index = 0;
         for (MessageWrapper evt : list) {
-            ids[index++] = evt.getTxnId();
+            ids[index++] = evt.getMsgId();
         }
         return ids;
     }

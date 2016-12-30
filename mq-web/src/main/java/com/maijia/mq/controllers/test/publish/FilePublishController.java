@@ -27,7 +27,7 @@ public class FilePublishController {
     @Resource
     private IFileMqService fileMqService;
 
-    String queueName = "test.file.publish1";
+    String queueName = "test.file.publish1-1";
     String exchangeName = "file.ex1";
     String host = "127.0.0.1";
 
@@ -67,11 +67,28 @@ public class FilePublishController {
         if (msg == null) {
             throw new IllegalArgumentException("msg is empty");
         }
-        Channel channel = new Channel();
-        channel.queueDeclare(queueName);
+        final Channel channel = new Channel();
         channel.setMqService(fileMqService);
         channel.exchangeDeclare(exchangeName, ExchangeType.FANOUT);
-        channel.basicPublish(msg);
+        for (int i=0; i<10; i++) {
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    Map<String, Object> map = new HashMap<>();
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    map.put("time", simpleDateFormat.format(new Date()) + "_broadcast");
+                    try {
+                        channel.basicPublish(map);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }, 0, 1000);
+        }
+//        channel.basicPublish(msg);
         return "produce success";
     }
 
@@ -87,7 +104,7 @@ public class FilePublishController {
         MQConsumer consumer = new DefaultMQConsumer() {
             @Override
             public void handleDelivery(Object message) {
-                System.out.println("C1 [x] Received '" + message + "'");
+                System.out.println("[file1-1] controller Received '" + message + "'");
                 try {
                     Thread.sleep(3000);
                 } catch (InterruptedException e) {
@@ -99,10 +116,7 @@ public class FilePublishController {
         //自动回复队列应答 -- 消息确认机制
         channel.basicConsume(consumer);
 
-        //如果执行到这说明连接已经断开，尝试重连MJMQ
-        System.out.println("===========尝试重连MJMQ==========");
-        socketTest();
-
+        //如果执行到这说明连接已经断开
         return "消费异常，断开连接";
     }
 
@@ -114,7 +128,7 @@ public class FilePublishController {
     }
 
     private boolean consume2() throws IOException {
-        String QUEUE_NAME = "test.file.publish2";
+        String QUEUE_NAME = "test.file.publish1-2";
         Connection connection = fileMqService.newConnection(host);
         Channel channel = connection.createChannel();
         channel.queueDeclare(QUEUE_NAME);
@@ -125,7 +139,7 @@ public class FilePublishController {
         MQConsumer consumer = new DefaultMQConsumer() {
             @Override
             public void handleDelivery(Object message) {
-                System.out.println("C2 [x] Received '" + message + "'");
+                System.out.println("[file1-2] controller Received '" + message + "'");
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
