@@ -1,5 +1,6 @@
 package com.maijia.mq.client;
 
+import com.maijia.mq.domain.Message;
 import com.maijia.mq.service.IMqService;
 import com.maijia.mq.service.MQConsumer;
 import org.apache.commons.lang3.StringUtils;
@@ -53,25 +54,13 @@ public class Channel implements Serializable {
         return queueName;
     }
 
-/*    public void setQueueName(String queueName) {
-        this.queueName = queueName;
-    }*/
-
     public String getExchangeName() {
         return exchangeName;
     }
 
-/*    public void setExchangeName(String exchangeName) {
-        this.exchangeName = exchangeName;
-    }*/
-
     public ExchangeType getExchangeType() {
         return exchangeType;
     }
-
-/*    public void setExchangeType(ExchangeType exchangeType) {
-        this.exchangeType = exchangeType;
-    }*/
 
     public IMqService getMqService() {
         return mqService;
@@ -84,12 +73,12 @@ public class Channel implements Serializable {
     /**
      * Publish a message
      *
-     * @param message
+     * @param rawMsg
      * @throws IOException
      * @throws InterruptedException
      */
-    public void basicPublish(Object message) throws IOException, InterruptedException {
-        if (message == null) {
+    public void basicPublish(Object rawMsg) throws IOException, InterruptedException {
+        if (rawMsg == null) {
             throw new NullPointerException("message is NULL");
         }
         if (mqService == null) {
@@ -97,7 +86,7 @@ public class Channel implements Serializable {
         }
 
         if (ExchangeType.FANOUT.equals(exchangeType)) {
-            mqService.produce(this, message);
+            mqService.produce(this, rawMsg);
             return;
         }
 
@@ -110,7 +99,7 @@ public class Channel implements Serializable {
             mqService.registerExchange(exchangeName, queueName);
         }
 
-        mqService.produce(this, message);
+        mqService.produce(this, rawMsg);
     }
 
     /**
@@ -148,7 +137,7 @@ public class Channel implements Serializable {
                 //获得消息 （读）
                 Object obj = is.readObject();
                 //进行消费
-                consumer.handleDelivery(obj);
+                consumer.handleDelivery((Message) obj);
 
                 //确认消费成功 （写）
                 os.writeObject("success");

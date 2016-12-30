@@ -2,6 +2,7 @@ package com.maijia.mq.consumer;
 
 import com.maijia.mq.cache.ICacheService;
 import com.maijia.mq.cahce.redis.util.RedisUtil;
+import com.maijia.mq.domain.Message;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -20,8 +21,8 @@ public class RedisConsumer implements Consumer {
     ICacheService cacheService;
 
     @Override
-    public Object take(String queueName) {
-        return cacheService.bRPop(0, RedisUtil.buildCacheKey(queueName));
+    public Message take(String queueName) {
+        return (Message) cacheService.bRPop(0, RedisUtil.buildCacheKey(queueName));
     }
 
     /**
@@ -31,7 +32,7 @@ public class RedisConsumer implements Consumer {
      * @return
      */
     @Override
-    public Object poll(String queueName) throws IOException, InterruptedException {
-        return cacheService.rPop(RedisUtil.buildCacheKey(queueName));
+    public Message poll(String queueName) throws IOException, InterruptedException {
+        return (Message) cacheService.rPop(RedisUtil.buildCacheKey(queueName));
     }
 }

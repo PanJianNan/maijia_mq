@@ -4,6 +4,7 @@ import com.alibaba.dubbo.rpc.RpcException;
 import com.maijia.mq.client.Channel;
 import com.maijia.mq.client.Connection;
 import com.maijia.mq.client.ExchangeType;
+import com.maijia.mq.domain.Message;
 import com.maijia.mq.service.IFileMqService;
 import com.maijia.mq.service.MQConsumer;
 import com.maijia.mq.service.impl.DefaultMQConsumer;
@@ -103,7 +104,7 @@ public class FilePublishController {
         //DefaultConsumer类实现了Consumer接口，通过传入一个频道，告诉服务器我们需要那个频道的消息，如果频道中有消息，就会执行回调函数handleDelivery
         MQConsumer consumer = new DefaultMQConsumer() {
             @Override
-            public void handleDelivery(Object message) {
+            public void handleDelivery(Message message) {
                 System.out.println("[file1-1] controller Received '" + message + "'");
                 try {
                     Thread.sleep(3000);
@@ -138,8 +139,8 @@ public class FilePublishController {
         //DefaultConsumer类实现了Consumer接口，通过传入一个频道，告诉服务器我们需要那个频道的消息，如果频道中有消息，就会执行回调函数handleDelivery
         MQConsumer consumer = new DefaultMQConsumer() {
             @Override
-            public void handleDelivery(Object message) {
-                System.out.println("[file1-2] controller Received '" + message + "'");
+            public void handleDelivery(Message message) {
+                System.out.println("[file1-2] controller Received '" + message.getContent() + "'");
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {

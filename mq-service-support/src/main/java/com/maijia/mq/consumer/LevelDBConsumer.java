@@ -1,5 +1,6 @@
 package com.maijia.mq.consumer;
 
+import com.maijia.mq.domain.Message;
 import com.maijia.mq.leveldb.LevelDBPersistenceAdapter;
 import com.maijia.mq.leveldb.LevelDBQueue;
 import com.maijia.mq.leveldb.QueueMiddleComponent;
@@ -22,13 +23,13 @@ public class LevelDBConsumer implements Consumer {
     LevelDBPersistenceAdapter adapter;
 
     @Override
-    public Object take(String queueName) throws IOException, InterruptedException {
+    public Message take(String queueName) throws IOException, InterruptedException {
         LevelDBQueue levelDBQueue = this.getLevelDBQueue(queueName);
         return levelDBQueue.take();
     }
 
     @Override
-    public Object poll(String queueName) throws IOException, InterruptedException {
+    public Message poll(String queueName) throws IOException, InterruptedException {
         LevelDBQueue levelDBQueue = this.getLevelDBQueue(queueName);
         return levelDBQueue.poll();
     }

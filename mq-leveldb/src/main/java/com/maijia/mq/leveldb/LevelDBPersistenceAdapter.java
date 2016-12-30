@@ -1,5 +1,6 @@
 package com.maijia.mq.leveldb;
 
+import com.maijia.mq.domain.Message;
 import com.maijia.mq.leveldb.other.IdWorker;
 import com.maijia.mq.leveldb.other.SerializeUtils;
 import org.apache.log4j.Logger;
@@ -54,7 +55,7 @@ public class LevelDBPersistenceAdapter implements Closeable {
 
     protected final IdWorker idWorker;
 
-    protected final Logger LOGGER = Logger.getLogger(this.getClass());
+    protected final Logger logger = Logger.getLogger(this.getClass());
 
     public LevelDBPersistenceAdapter() {
         idWorker = new IdWorker(1);
@@ -174,8 +175,8 @@ public class LevelDBPersistenceAdapter implements Closeable {
         Options options = createOptions();
         File dirPath = getDirPath();
         db = factory.open(dirPath, options);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("open leveldb success, path:" + dirPath.getCanonicalPath());
+        if (logger.isDebugEnabled()) {
+            logger.debug("open leveldb success, path:" + dirPath.getCanonicalPath());
         }
     }
 
@@ -185,8 +186,8 @@ public class LevelDBPersistenceAdapter implements Closeable {
         }
         db.close();
         db = null;
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("closed leveldb success");
+        if (logger.isDebugEnabled()) {
+            logger.debug("closed leveldb success");
         }
     }
 
@@ -213,12 +214,11 @@ public class LevelDBPersistenceAdapter implements Closeable {
      * @return 返回的是msgId
      * @throws PersistenceException
      */
-    public String save(Object message)
-            throws PersistenceException {
+    public String save(Message message) throws PersistenceException {
         MessageWrapper wrapper = new MessageWrapper(nextId(), message);
         put(wrapper.getMsgId(), wrapper);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(new StringBuilder("saved evt:").append(wrapper.getMsgId()));
+        if (logger.isDebugEnabled()) {
+            logger.debug(new StringBuilder("saved evt:").append(wrapper.getMsgId()));
         }
         return wrapper.getMsgId();
     }
@@ -229,8 +229,8 @@ public class LevelDBPersistenceAdapter implements Closeable {
         while ((list = list(count)).size() > 0) {
             String[] ids = toIds(list);
             deleteById(ids);
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug(new StringBuilder("deleted keys:").append(ids));
+            if (logger.isDebugEnabled()) {
+                logger.debug(new StringBuilder("deleted keys:").append(ids));
             }
         }
     }
@@ -267,7 +267,7 @@ public class LevelDBPersistenceAdapter implements Closeable {
     }
 
     public <T> List<T> getMore(Class<T> type, String... keys) throws PersistenceException {
-        List<T> list = new ArrayList<T>(keys.length);
+        List<T> list = new ArrayList<>(keys.length);
         for (String key : keys) {
             list.add(get(key, type));
         }
@@ -275,7 +275,7 @@ public class LevelDBPersistenceAdapter implements Closeable {
     }
 
     public List<MessageWrapper> list(int batchSize, DBIterator iterator) throws PersistenceException {
-        List<MessageWrapper> list = new ArrayList<MessageWrapper>();
+        List<MessageWrapper> list = new ArrayList<>();
         try {
             int index = 0;
             for (; index < batchSize && iterator.hasNext(); iterator.next(), index++) {

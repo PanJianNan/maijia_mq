@@ -12,8 +12,8 @@ public interface Producer {
     /**
      * 生产消息
      * @param queueName
-     * @param msg
+     * @param rawMsg
      * @return
      */
-    boolean produce(String queueName, Object msg) throws IOException, InterruptedException;
+    boolean produce(String queueName, Object rawMsg) throws IOException, InterruptedException;
 }

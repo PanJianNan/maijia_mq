@@ -1,5 +1,6 @@
 package com.maijia.mq.service.impl;
 
+import com.maijia.mq.domain.Message;
 import com.maijia.mq.service.MQConsumer;
 
 /**
@@ -11,7 +12,7 @@ import com.maijia.mq.service.MQConsumer;
 public class DefaultMQConsumer implements MQConsumer {
 
     @Override
-    public void handleDelivery(Object message) {
+    public void handleDelivery(Message message) {
 
     }
 }

@@ -1,6 +1,7 @@
 package com.maijia.mq.consumer;
 
 import com.maijia.mq.domain.MQData;
+import com.maijia.mq.domain.Message;
 import com.maijia.mq.domain.MessageQueue;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ import java.io.IOException;
 public class DefaultConsumer implements Consumer {
 
     @Override
-    public Object take(String queueName) throws InterruptedException {
+    public Message take(String queueName) throws InterruptedException {
         if (StringUtils.isBlank(queueName)) {
             throw new IllegalArgumentException("队列名称不能为空！");
         }
@@ -28,7 +29,7 @@ public class DefaultConsumer implements Consumer {
             MQData.QUEUE_MAP.put(queueName, mq);
         }
 
-        return mq.take();
+        return (Message) mq.take();
     }
 
     /**
@@ -38,7 +39,7 @@ public class DefaultConsumer implements Consumer {
      * @return
      */
     @Override
-    public Object poll(String queueName) throws IOException, InterruptedException {
+    public Message poll(String queueName) throws IOException, InterruptedException {
         if (StringUtils.isBlank(queueName)) {
             throw new IllegalArgumentException("队列名称不能为空！");
         }
@@ -49,6 +50,6 @@ public class DefaultConsumer implements Consumer {
             MQData.QUEUE_MAP.put(queueName, mq);
         }
 
-        return mq.poll();
+        return (Message) mq.poll();
     }
 }

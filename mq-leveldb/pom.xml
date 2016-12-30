@@ -11,16 +11,10 @@
 	<description>MQ implemented by LevelDB for store message</description>
 
 	<dependencies>
-		<!--<dependency>-->
-			<!--<groupId>${project.groupId}</groupId>-->
-			<!--<artifactId>ec-api</artifactId>-->
-			<!--<version>${project.version}</version>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>${project.groupId}</groupId>-->
-			<!--<artifactId>ec-remote</artifactId>-->
-			<!--<version>${project.version}</version>-->
-		<!--</dependency>-->
+		<dependency>
+			<groupId>com.maijia.mq</groupId>
+			<artifactId>mq-domain</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.fusesource.leveldbjni</groupId>
 			<artifactId>leveldbjni-all</artifactId>

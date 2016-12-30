@@ -1,5 +1,7 @@
 package com.maijia.mq.service;
 
+import com.maijia.mq.domain.Message;
+
 /**
  * MQConsumer
  *
@@ -12,5 +14,5 @@ public interface MQConsumer {
      *
      * @param message
      */
-    void handleDelivery(Object message);
+    void handleDelivery(Message message);
 }

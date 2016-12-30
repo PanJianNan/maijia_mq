@@ -30,19 +30,19 @@ public class ExchangeCenter {
      * @param exchangeName
      * @param exchangeType
      * @param queueName
-     * @param message
+     * @param rawMsg
      * @return
      * @throws IOException
      * @throws InterruptedException
      */
-    public boolean transmit(final Producer producer, String exchangeName, ExchangeType exchangeType, String queueName, Object message) throws IOException, InterruptedException {
+    public boolean transmit(final Producer producer, String exchangeName, ExchangeType exchangeType, String queueName, Object rawMsg) throws IOException, InterruptedException {
         switch (exchangeType) {
             case DIRECT:
-                return producer.produce(queueName, message);
+                return producer.produce(queueName, rawMsg);
             case FANOUT:
                 Set<String> queueSet = exchangeMap.get(exchangeName);
                 if (queueSet != null) {
-                    final Object targetMsg = message;
+                    final Object targetMsg = rawMsg;
                     for (final String queue : queueSet) {
                         Thread thread = new Thread(new Runnable() {
                             @Override
@@ -64,7 +64,7 @@ public class ExchangeCenter {
                 //todo topic type 暂不支持
                 return false;
             default:
-                return producer.produce(queueName, message);
+                return producer.produce(queueName, rawMsg);
         }
         return true;
     }

@@ -13,24 +13,24 @@ import java.io.IOException;
  * @author panjn
  * @date 2016/10/26
  */
-public interface IMqService<E> {
+public interface IMqService {
     /**
      * 生产消息
      *
      * @param queueName 队列名称
-     * @param message       消息
+     * @param rawMsg    消息
      * @return
      */
-    boolean produce(String queueName, E message) throws IOException, InterruptedException;
+    boolean produce(String queueName, Object rawMsg) throws IOException, InterruptedException;
 
     /**
      * 生产消息
      *
      * @param channel 信道
-     * @param message     消息
+     * @param rawMsg  消息
      * @return
      */
-    boolean produce(Channel channel, E message) throws IOException, InterruptedException;
+    boolean produce(Channel channel, Object rawMsg) throws IOException, InterruptedException;
 
     /**
      * 消费消息
@@ -38,7 +38,7 @@ public interface IMqService<E> {
      * @param queueName 队列名称
      * @return
      */
-    E consume(String queueName) throws IOException, InterruptedException;
+    Object consume(String queueName) throws IOException, InterruptedException;
 
     /**
      * 与MJMQ建立连接

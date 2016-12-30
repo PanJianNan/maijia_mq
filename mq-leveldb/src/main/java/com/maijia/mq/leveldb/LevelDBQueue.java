@@ -1,5 +1,6 @@
 package com.maijia.mq.leveldb;
 
+import com.maijia.mq.domain.Message;
 import com.maijia.mq.leveldb.strategy.LimitReadHouseKeepingStrategy;
 import org.apache.log4j.Logger;
 
@@ -17,7 +18,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author panjn
  * @date 2016/12/12
  */
-public class LevelDBQueue<E> {
+public class LevelDBQueue {
 
     /**
      * The capacity bound, or Integer.MAX_VALUE if none
@@ -49,7 +50,7 @@ public class LevelDBQueue<E> {
      */
     private final Condition notFull = putLock.newCondition();
 
-    private final QueueMiddleComponent<E> adapter;
+    private final QueueMiddleComponent adapter;
 
     private volatile boolean isOpen = false;
 
@@ -100,8 +101,8 @@ public class LevelDBQueue<E> {
      * @throws InterruptedException {@inheritDoc}
      * @throws NullPointerException {@inheritDoc}
      */
-    public void put(E msg) throws InterruptedException {
-        if (msg == null) {
+    public void put(Message message) throws InterruptedException {
+        if (message == null) {
             throw new NullPointerException();
         }
         // Note: convention in all put/take/etc is to preset local var
@@ -122,7 +123,7 @@ public class LevelDBQueue<E> {
             while (count.get() == capacity) {
                 notFull.await();
             }
-            adapter.save(msg);
+            adapter.save(message);
             c = count.getAndIncrement();
             if (c + 1 < capacity) {
                 notFull.signal();
@@ -148,8 +149,8 @@ public class LevelDBQueue<E> {
      *
      * @throws NullPointerException if the specified element is null
      */
-    public boolean offer(E msg) {
-        if (msg == null) {
+    public boolean offer(Message message) {
+        if (message == null) {
             throw new NullPointerException();
         }
         final AtomicInteger count = this.count;
@@ -161,7 +162,7 @@ public class LevelDBQueue<E> {
         putLock.lock();
         try {
             if (count.get() < capacity) {
-                adapter.save(msg);
+                adapter.save(message);
                 c = count.getAndIncrement();
                 if (c + 1 < capacity) {
                     notFull.signal();
@@ -178,8 +179,8 @@ public class LevelDBQueue<E> {
         return c >= 0;
     }
 
-    public E take() throws InterruptedException {
-        E x = null;
+    public Message take() throws InterruptedException {
+        Message x = null;
         int c = -1;
         final AtomicInteger count = this.count;
         final ReentrantLock takeLock = this.takeLock;
@@ -205,8 +206,8 @@ public class LevelDBQueue<E> {
         return x;
     }
 
-    public E poll(long timeout, TimeUnit unit) throws InterruptedException {
-        E x = null;
+    public Message poll(long timeout, TimeUnit unit) throws InterruptedException {
+        Message x = null;
         int c = -1;
         long nanos = unit.toNanos(timeout);
         final AtomicInteger count = this.count;
@@ -234,12 +235,12 @@ public class LevelDBQueue<E> {
         return x;
     }
 
-    public E poll() {
+    public Message poll() {
         final AtomicInteger count = this.count;
         if (count.get() == 0) {
             return null;
         }
-        E x = null;
+        Message x = null;
         int c = -1;
         final ReentrantLock takeLock = this.takeLock;
         takeLock.lock();
@@ -298,8 +299,8 @@ public class LevelDBQueue<E> {
      * @throws InterruptedException {@inheritDoc}
      * @throws NullPointerException {@inheritDoc}
      */
-    public boolean offer(E msg, long timeout, TimeUnit unit) throws InterruptedException {
-        if (msg == null) {
+    public boolean offer(Message message, long timeout, TimeUnit unit) throws InterruptedException {
+        if (message == null) {
             throw new NullPointerException();
         }
         long nanos = unit.toNanos(timeout);
@@ -314,7 +315,7 @@ public class LevelDBQueue<E> {
                 }
                 nanos = notFull.awaitNanos(nanos);
             }
-            adapter.save(msg);
+            adapter.save(message);
             c = count.getAndIncrement();
             if (c + 1 < capacity) {
                 notFull.signal();

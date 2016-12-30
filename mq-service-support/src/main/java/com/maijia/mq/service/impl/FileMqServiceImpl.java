@@ -5,6 +5,7 @@ import com.maijia.mq.client.Connection;
 import com.maijia.mq.client.ExchangeType;
 import com.maijia.mq.consumer.Consumer;
 import com.maijia.mq.core.ExchangeCenter;
+import com.maijia.mq.domain.Message;
 import com.maijia.mq.producer.Producer;
 import com.maijia.mq.service.IFileMqService;
 import org.apache.commons.lang3.StringUtils;
@@ -45,29 +46,29 @@ public class FileMqServiceImpl implements IFileMqService {
      * 生产消息
      *
      * @param queueName 队列名称
-     * @param message   消息
+     * @param rawMsg   消息
      * @return
      */
     @Override
-    public boolean produce(String queueName, Object message) throws IOException, InterruptedException {
-        System.out.println("有人来下蛋了" + message);
-        return levelDBProducer.produce(queueName, message);
+    public boolean produce(String queueName, Object rawMsg) throws IOException, InterruptedException {
+        System.out.println("有人来下蛋了" + rawMsg);
+        return levelDBProducer.produce(queueName, rawMsg);
     }
 
     /**
      * 生产消息
      *
      * @param channel 信道
-     * @param message 消息
+     * @param rawMsg 消息
      * @return
      */
     @Override
-    public boolean produce(Channel channel, Object message) throws IOException, InterruptedException {
+    public boolean produce(Channel channel, Object rawMsg) throws IOException, InterruptedException {
         if (channel == null) {
             throw new NullPointerException("channel is NULL");
         }
 
-        if (message == null) {
+        if (rawMsg == null) {
             throw new NullPointerException("message is NULL");
         }
 
@@ -77,7 +78,7 @@ public class FileMqServiceImpl implements IFileMqService {
             throw new IllegalArgumentException("channel's queueName must be not blank when exchangeType isn't fanout");
         }
 
-        return exchangeCenter.transmit(levelDBProducer, channel.getExchangeName(), exchangeType, queueName, message);
+        return exchangeCenter.transmit(levelDBProducer, channel.getExchangeName(), exchangeType, queueName, rawMsg);
     }
 
     /**
@@ -213,12 +214,12 @@ public class FileMqServiceImpl implements IFileMqService {
 
                     if (recevice instanceof String && !"success".equals(recevice)) {
                         //返回消息
-                        Object msg = levelDBConsumer.take((String) recevice);
-                        System.out.println("有货到，马上消费：" + msg);
+                        Message message = levelDBConsumer.take((String) recevice);
+                        System.out.println("有货到，马上消费：" + message);
                         //备份信息以便消费失败时回滚该消息
-                        failMsgMap.put((String) recevice, msg);
+                        failMsgMap.put((String) recevice, message);
 
-                        os.writeObject(msg);
+                        os.writeObject(message);
                         //向客户端输出该字符串 （写）
                         os.flush();
                     }

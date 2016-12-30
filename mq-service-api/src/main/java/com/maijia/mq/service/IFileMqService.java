@@ -8,5 +8,5 @@ package com.maijia.mq.service;
  * @author panjn                   
  * @date 2016/10/26
  */
-public interface IFileMqService<E> extends IMqService<E> {
+public interface IFileMqService extends IMqService {
 }

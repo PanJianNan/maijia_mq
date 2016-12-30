@@ -1,5 +1,6 @@
 package com.maijia.mq.leveldb;
 
+import com.maijia.mq.domain.Message;
 import org.apache.log4j.Logger;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.WriteBatch;
@@ -16,7 +17,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author panjn
  * @date 2016/12/12
  */
-public class QueueMiddleComponent<E> {
+public class QueueMiddleComponent {
 
     static final String KEY_READ_CURSOR = "rc";
 
@@ -269,11 +270,11 @@ public class QueueMiddleComponent<E> {
         return gapPageNum * pageSize + leftPageSize;
     }
 
-    public String save(Object msg) throws PersistenceException {
+    public String save(Message message) throws PersistenceException {
 //        final ReentrantLock writeLock = this.writeLock;
 //		writeLock.lock();
         WriteBatch wb = adapter.getDb().createWriteBatch();
-        MessageWrapper<Object> messageWrapper = new MessageWrapper(adapter.nextId(), msg);
+        MessageWrapper messageWrapper = new MessageWrapper(adapter.nextId(), message);
         try {
             if (adapter.getDb() == null) {
                 // 表示已关闭
@@ -318,11 +319,11 @@ public class QueueMiddleComponent<E> {
      * @return
      * @throws PersistenceException
      */
-    public E pop() throws PersistenceException {
+    public Message pop() throws PersistenceException {
 //        final ReentrantLock readLock = this.readLock;
 //		readLock.lock();
         try {
-            List<E> list = pop(1);
+            List<Message> list = pop(1);
             if (list == null || list.size() == 0) {
                 return null;
             }
@@ -339,12 +340,12 @@ public class QueueMiddleComponent<E> {
      * @return
      * @throws PersistenceException
      */
-    public List<E> pop(int bulkSize) throws PersistenceException {
+    public List<Message> pop(int bulkSize) throws PersistenceException {
 //        final ReentrantLock readLock = this.readLock;
 //		readLock.lock();
         try {
             long index = readCursor.getIndex();
-            List<E> list = _peek(bulkSize);
+            List<Message> list = _peek(bulkSize);
             if (list == null || list.size() == 0) {
                 return list;
             }
@@ -390,11 +391,11 @@ public class QueueMiddleComponent<E> {
      * @return
      * @throws PersistenceException
      */
-    public E peek() throws PersistenceException {
+    public Message peek() throws PersistenceException {
         final ReentrantLock readLock = this.readLock;
         readLock.lock();
         try {
-            List<E> list = _peek(1);
+            List<Message> list = _peek(1);
             if (list == null || list.size() == 0) {
                 return null;
             }
@@ -411,7 +412,7 @@ public class QueueMiddleComponent<E> {
      * @return
      * @throws PersistenceException
      */
-    protected List<E> _peek(int bulkSize) throws PersistenceException {
+    protected List<Message> _peek(int bulkSize) throws PersistenceException {
         if (writeCursor.getPageNo() == readCursor.getPageNo() && writeCursor.getIndex() == readCursor.getIndex()) {
             return null;
         }
@@ -419,15 +420,15 @@ public class QueueMiddleComponent<E> {
         long startIndex = readCursor.getIndex();
         List<String> msgIds = new ArrayList<>();
         loadMsgIds(msgIds, (int) startIndex, readCursor.getPageNo(), bulkSize);
-        List<E> list = new ArrayList<>(msgIds.size());
+        List<Message> list = new ArrayList<>(msgIds.size());
         for (String msgId : msgIds) {
-            MessageWrapper<E> wrapper = get(msgId, MessageWrapper.class);
+            MessageWrapper wrapper = get(msgId, MessageWrapper.class);
             list.add(wrapper == null ? null : wrapper.getMessage());
         }
         return list;
     }
 
-    public List<E> peek(int bulkSize) throws PersistenceException {
+    public List<Message> peek(int bulkSize) throws PersistenceException {
         final ReentrantLock readLock = this.readLock;
         readLock.lock();
         try {

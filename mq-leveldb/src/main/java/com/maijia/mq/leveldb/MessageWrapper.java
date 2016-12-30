@@ -1,5 +1,7 @@
 package com.maijia.mq.leveldb;
 
+import com.maijia.mq.domain.Message;
+
 import java.io.Serializable;
 
 /**
@@ -8,15 +10,15 @@ import java.io.Serializable;
  * @author panjn
  * @date 2016/12/16
  */
-public class MessageWrapper<E> implements Serializable {
+public class MessageWrapper implements Serializable {
 
     private static final long serialVersionUID = -8753164406257202610L;
 
     private final String msgId;
 
-    private final E message;
+    private final Message message;
 
-    public MessageWrapper(String msgId, E message) {
+    public MessageWrapper(String msgId, Message message) {
         this.msgId = msgId;
         this.message = message;
     }
@@ -25,7 +27,7 @@ public class MessageWrapper<E> implements Serializable {
         return msgId;
     }
 
-    public E getMessage() {
+    public Message getMessage() {
         return message;
     }
 }
