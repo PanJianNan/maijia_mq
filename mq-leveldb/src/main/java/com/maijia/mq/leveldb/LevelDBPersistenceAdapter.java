@@ -60,8 +60,20 @@ public class LevelDBPersistenceAdapter implements Closeable {
     public LevelDBPersistenceAdapter() {
         idWorker = new IdWorker(1);
         //初始化leveldb数据存储路径
-        File dirPath = new File(System.getProperty("user.dir") + File.separator + "target" + File.separator + "mq-leveldb");
-        this.dirPath = dirPath;
+        // get current dir
+        File curPath = new File(System.getProperty("user.dir"));
+        // get parent dir
+        String parentPath = curPath.getParent();
+        File dataDir = new File(parentPath + File.separator + "data");
+        if (!dataDir.exists()) {
+            dataDir.mkdirs();
+        }
+        File leveldbDir = new File(dataDir.getPath() + File.separator + "mq-leveldb");
+
+        if (!leveldbDir.exists()) {
+            leveldbDir.mkdirs();
+        }
+        this.dirPath = leveldbDir;
     }
 
     public File getDirPath() {

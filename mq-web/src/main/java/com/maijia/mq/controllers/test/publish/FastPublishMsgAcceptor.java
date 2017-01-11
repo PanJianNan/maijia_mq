@@ -19,7 +19,7 @@ import java.io.IOException;
  * @author panjn
  * @date 2016/12/29
  */
-@Component
+//@Component
 public class FastPublishMsgAcceptor extends AbstractMessageAcceptor {
 
     @Resource
@@ -27,7 +27,8 @@ public class FastPublishMsgAcceptor extends AbstractMessageAcceptor {
 
     String queueName = "test.fast.publish2";
     String exchangeName = "fast.ex1";
-    String host = "127.0.0.1";
+    String host = "192.168.102.137";
+//    String host = "127.0.0.1";
 
     @PostConstruct
     public void fire() {

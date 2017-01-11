@@ -63,7 +63,7 @@ public class MqServiceImpl implements IMqService {
      * @return
      */
     @Override
-    public boolean produce(Channel channel, final Object rawMsg) throws IOException, InterruptedException {
+    public boolean produce(Channel channel, Object rawMsg) throws IOException, InterruptedException {
         if (channel == null) {
             throw new NullPointerException("channel is NULL");
         }
@@ -210,12 +210,12 @@ public class MqServiceImpl implements IMqService {
                 while (true) {
                     //接收消费请求 （读）
                     Object recevice = is.readObject();
-                    System.out.println("收到请求");
+//                    System.out.println("收到请求");
 
                     if (recevice instanceof String && !"success".equals(recevice)) {
                         //返回消息
                         Message message = levelDBConsumer.take((String) recevice);
-                        System.out.println("有货到，马上消费：" + message);
+//                        System.out.println("有货到，马上消费：" + message);
                         //备份信息以便消费失败时回滚该消息
                         failMsgMap.put((String) recevice, message);
 
@@ -227,11 +227,9 @@ public class MqServiceImpl implements IMqService {
                     //确认消费成功 （读）
                     Object ack = is.readObject();
                     if (recevice instanceof String && "success".equals(ack)) {
-                        System.out.println("客户端消费成功");
+                        logger.info("客户端消费成功");
                         failMsgMap.remove((String) recevice);
                     }
-
-                    Thread.sleep(3000);
                 }
 
             } catch (Exception e) {

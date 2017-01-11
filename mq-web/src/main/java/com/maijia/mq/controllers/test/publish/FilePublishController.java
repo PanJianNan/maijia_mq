@@ -1,9 +1,7 @@
 package com.maijia.mq.controllers.test.publish;
 
 import com.alibaba.dubbo.rpc.RpcException;
-import com.maijia.mq.client.Channel;
-import com.maijia.mq.client.Connection;
-import com.maijia.mq.client.ExchangeType;
+import com.maijia.mq.client.*;
 import com.maijia.mq.domain.Message;
 import com.maijia.mq.service.IFileMqService;
 import com.maijia.mq.service.MQConsumer;
@@ -30,7 +28,8 @@ public class FilePublishController {
 
     String queueName = "test.file.publish1-1";
     String exchangeName = "file.ex1";
-    String host = "127.0.0.1";
+    String host = "192.168.102.137";
+//String host = "127.0.0.1";
 
     @RequestMapping(value = "produce")
     public String produce(final String msg) throws IOException, InterruptedException {
@@ -68,8 +67,14 @@ public class FilePublishController {
         if (msg == null) {
             throw new IllegalArgumentException("msg is empty");
         }
-        final Channel channel = new Channel();
-        channel.setMqService(fileMqService);
+        // 创建连接工厂
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost(host);
+        factory.setPort(3198);
+        factory.setMode(FactoryMode.FILE);
+        Connection connection = factory.newConnection();
+        final Channel channel = connection.createChannel();
+        channel.setMqService(factory.getMqService());
         channel.exchangeDeclare(exchangeName, ExchangeType.FANOUT);
         for (int i=0; i<10; i++) {
             Timer timer = new Timer();

@@ -186,7 +186,7 @@ public class FileMqServiceImpl implements IFileMqService {
                     throw e;
                 }
 
-                //todo 心跳检测在windows中最多值允许17次，超过会发生异常，linux则不会(wtf！,linux也是17次)
+                //todo 心跳检测在windows中最多只允许17次，超过会发生异常，linux则不会(wtf！,linux也是17次)
                 //2016年12月19日，实测，即使没有心跳检测，发现一旦客户端断开之后，服务端会先尝试Connection reset，重连失败后Socket Closed，占用的端口资源也会释放
                 /*HeartBeatThread heartBeatThread = new HeartBeatThread(socket);
                 Thread hbt = new Thread(heartBeatThread);
@@ -210,12 +210,12 @@ public class FileMqServiceImpl implements IFileMqService {
                 while (true) {
                     //接收消费请求 （读）
                     Object recevice = is.readObject();
-                    System.out.println("收到请求");
+//                    System.out.println("收到请求");
 
                     if (recevice instanceof String && !"success".equals(recevice)) {
                         //返回消息
                         Message message = levelDBConsumer.take((String) recevice);
-                        System.out.println("有货到，马上消费：" + message);
+//                        System.out.println("有货到，马上消费：" + message);
                         //备份信息以便消费失败时回滚该消息
                         failMsgMap.put((String) recevice, message);
 
@@ -227,11 +227,9 @@ public class FileMqServiceImpl implements IFileMqService {
                     //确认消费成功 （读）
                     Object ack = is.readObject();
                     if (recevice instanceof String && "success".equals(ack)) {
-                        System.out.println("客户端消费成功");
+                        logger.info("客户端消费成功");
                         failMsgMap.remove((String) recevice);
                     }
-
-                    Thread.sleep(3000);
                 }
 
             } catch (Exception e) {

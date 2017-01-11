@@ -9,7 +9,6 @@
     <version>1.0.0-SNAPSHOT</version>
     <modules>
         <module>mq-web</module>
-        <module>mq-dubbo</module>
         <module>mq-service-api</module>
         <module>mq-service-support</module>
         <module>mq-domain</module>
@@ -17,6 +16,8 @@
         <module>mq-cache-redis</module>
         <module>mq-util</module>
         <module>mq-leveldb</module>
+        <module>mq-console</module>
+        <module>assembly</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -32,6 +33,7 @@
         <version.hamcrest.core>1.3</version.hamcrest.core>
         <version.mockito.core>1.9.5</version.mockito.core>
         <version.leveldbjni>1.8</version.leveldbjni>
+        <netty.version>3.6.1.Final</netty.version>
     </properties>
 
     <dependencyManagement>
@@ -69,6 +71,11 @@
             <dependency>
                 <groupId>com.maijia.mq</groupId>
                 <artifactId>mq-leveldb</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.maijia.mq</groupId>
+                <artifactId>mq-console</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>

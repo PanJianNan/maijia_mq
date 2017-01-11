@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+<assembly>
+    <!-- 打包后文件"-"后面的标识，如release -->
+    <id>bin</id>
+    <!-- 可打包为war或jar等 -->
+    <formats>
+        <format>tar.gz</format>
+    </formats>
+
+    <!-- 打的包中是否会带根目录符，还是直接src的同级文件 -->
+    <!--<includeBaseDirectory>false</includeBaseDirectory>-->
+
+    <!-- 将File文件指定编译到另一个目录位置（单个文件方式） -->
+    <!--<files>
+        <file>
+            <source>src/main/java/com/test/maven/test/file/File.java</source>
+            <destName>File1.java</destName>
+            <fileMode>0644</fileMode>
+        </file>
+    </files>-->
+    <!-- 将File文件指定编译到另一个目录位置（目录） -->
+    <fileSets>
+        <!-- Copy over everything that needs to get unix line endings -->
+        <fileSet>
+            <directory>src/release</directory>
+            <outputDirectory>/</outputDirectory>
+            <excludes>
+                <exclude>bin/**</exclude>
+                <exclude>conf/*.ts</exclude>
+                <exclude>conf/*.ks</exclude>
+                <exclude>conf/*.cert</exclude>
+                <exclude>examples/**/*.sh</exclude>
+                <exclude>examples/**/*.rb</exclude>
+                <exclude>webapps/*.ico</exclude>
+                <exclude>examples/**/pom.xml</exclude>
+            </excludes>
+            <fileMode>0644</fileMode>
+            <directoryMode>0755</directoryMode>
+            <lineEnding>unix</lineEnding>
+        </fileSet>
+
+        <!-- Copy over the files that need to be filtered -->
+        <fileSet>
+            <directory>src/release</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>examples/**/pom.xml</include>
+            </includes>
+            <lineEnding>unix</lineEnding>
+            <filtered>true</filtered>
+        </fileSet>
+
+        <fileSet>
+            <directory>src/release</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>bin/macosx/wrapper.conf</include>
+                <include>bin/linux-*/wrapper.conf</include>
+            </includes>
+            <fileMode>0644</fileMode>
+            <directoryMode>0755</directoryMode>
+            <lineEnding>unix</lineEnding>
+        </fileSet>
+
+        <!-- Copy over the files that should not get the line endings converted but need to be chmod to 755 -->
+        <fileSet>
+            <directory>src/release</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>bin/linux-*/wrapper</include>
+                <include>bin/linux-*/libwrapper.so</include>
+                <include>bin/macosx/wrapper</include>
+                <include>bin/macosx/libwrapper.jnilib</include>
+            </includes>
+            <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
+        </fileSet>
+        <!-- include patched JAR files -->
+        <fileSet>
+            <directory>src/patch</directory>
+            <outputDirectory>/lib</outputDirectory>
+            <includes>
+                <include>*</include>
+            </includes>
+            <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
+        </fileSet>
+
+        <!-- Copy over the files that need unix line endings and also chmod to 755 -->
+        <fileSet>
+            <directory>src/release</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>bin/server.sh</include>
+                <include>bin/maijiamq</include>
+                <include>bin/maijiamq-diag</include>
+                <include>bin/macosx/maijiamq</include>
+                <include>bin/linux-*/maijiamq</include>
+            </includes>
+            <directoryMode>0755</directoryMode>
+            <fileMode>0755</fileMode>
+            <lineEnding>unix</lineEnding>
+        </fileSet>
+
+        <!-- Copy over the unix-script configuration file that need unix line endings and also chmod to 644 -->
+        <fileSet>
+            <directory>src/release</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>bin/env</include>
+            </includes>
+            <directoryMode>0755</directoryMode>
+            <fileMode>0644</fileMode>
+            <lineEnding>unix</lineEnding>
+        </fileSet>
+
+    </fileSets>
+
+    <componentDescriptors>
+        <componentDescriptor>src/main/descriptors/common-bin.xml</componentDescriptor>
+    </componentDescriptors>
+
+</assembly>
