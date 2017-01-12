@@ -7,10 +7,8 @@ import com.maijia.mq.domain.Message;
 import com.maijia.mq.service.IFastMqService;
 import com.maijia.mq.service.MQConsumer;
 import com.maijia.mq.service.impl.DefaultMQConsumer;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.io.IOException;
 
 /**
@@ -22,7 +20,7 @@ import java.io.IOException;
 //@Component
 public class FastPublishMsgAcceptor extends AbstractMessageAcceptor {
 
-    @Resource
+//    @Resource
     private IFastMqService fastMqService;
 
     String queueName = "test.fast.publish2";

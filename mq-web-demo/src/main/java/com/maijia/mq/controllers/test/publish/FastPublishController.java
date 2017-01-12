@@ -1,6 +1,5 @@
 package com.maijia.mq.controllers.test.publish;
 
-import com.alibaba.dubbo.rpc.RpcException;
 import com.maijia.mq.client.Channel;
 import com.maijia.mq.client.Connection;
 import com.maijia.mq.client.ExchangeType;
@@ -11,8 +10,8 @@ import com.maijia.mq.service.impl.DefaultMQConsumer;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.io.IOException;
+import java.net.ConnectException;
 
 /**
  * PublishController
@@ -23,7 +22,7 @@ import java.io.IOException;
 @RestController
 @RequestMapping(value = "test/fast/publish")
 public class FastPublishController {
-    @Resource
+//    @Resource
     private IFastMqService fastMqService;
 
     String queueName = "test.fast.publish1-1";
@@ -122,7 +121,7 @@ public class FastPublishController {
         try  {
             System.out.println("===========尝试重连MJMQ==========");
             consume2();
-        } catch (RpcException e) {
+        } catch (ConnectException e) {
             System.out.println("===========重连MJMQ失败，1分后重试！==========");
             try {
                 Thread.sleep(60 * 1000);

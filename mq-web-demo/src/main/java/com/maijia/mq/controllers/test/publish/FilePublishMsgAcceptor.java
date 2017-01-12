@@ -2,13 +2,11 @@ package com.maijia.mq.controllers.test.publish;
 
 import com.maijia.mq.client.*;
 import com.maijia.mq.domain.Message;
-import com.maijia.mq.service.IFileMqService;
 import com.maijia.mq.service.MQConsumer;
 import com.maijia.mq.service.impl.DefaultMQConsumer;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.io.IOException;
 
 /**
@@ -19,9 +17,6 @@ import java.io.IOException;
  */
 @Component
 public class FilePublishMsgAcceptor extends AbstractMessageAcceptor {
-
-    @Resource
-    private IFileMqService fileMqService;
 
     String queueName = "test.file.publish2-1";
     String exchangeName = "file.ex1";

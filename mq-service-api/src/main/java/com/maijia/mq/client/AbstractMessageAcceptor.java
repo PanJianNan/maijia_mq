@@ -1,6 +1,5 @@
 package com.maijia.mq.client;
 
-import com.alibaba.dubbo.rpc.RpcException;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -39,7 +38,7 @@ public abstract class AbstractMessageAcceptor {
         try {
             logger.info("===========尝试重连MJMQ==========");
             link();
-        } catch (RpcException | ConnectException e) {//todo 完全剥离dubbo时就不需要捕获RpcException了
+        } catch (ConnectException e) {
             logger.info("===========重连MJMQ失败，1分后重试！==========");
             try {
                 Thread.sleep(60 * 1000);

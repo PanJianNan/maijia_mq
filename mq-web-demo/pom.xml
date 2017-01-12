@@ -9,11 +9,11 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <!-- artifactId: 项目的通用名称 -->
-    <artifactId>mq-web</artifactId>
+    <artifactId>mq-web-demo</artifactId>
     <!-- packaging: 打包的机制，如pom, jar, maven-plugin, ejb, war, ear, rar, par   -->
     <packaging>war</packaging>
     <!-- 项目的名称， Maven 产生的文档用 -->
-    <name>mq-web</name>
+    <name>mq-web-demo</name>
     <!-- 哪个网站可以找到这个项目,提示如果 Maven 资源列表没有，可以直接上该网站寻找, Maven 产生的文档用 -->
     <url>http://mq.maijia.com</url>
 
@@ -61,7 +61,7 @@
     </profiles>
 
     <build>
-        <finalName>maijia_mq</finalName>
+        <finalName>maijia_mq_demo</finalName>
 
         <filters>
             <filter>profiles/${env}/build.properties</filter>

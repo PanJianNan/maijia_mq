@@ -1,6 +1,5 @@
 package com.maijia.mq.controllers.test.publish;
 
-import com.alibaba.dubbo.rpc.RpcException;
 import com.maijia.mq.client.*;
 import com.maijia.mq.domain.Message;
 import com.maijia.mq.service.IFileMqService;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -23,7 +23,7 @@ import java.util.*;
 @RestController
 @RequestMapping(value = "test/file/publish")
 public class FilePublishController {
-    @Resource
+//    @Resource
     private IFileMqService fileMqService;
 
     String queueName = "test.file.publish1-1";
@@ -164,7 +164,7 @@ public class FilePublishController {
         try  {
             System.out.println("===========尝试重连MJMQ==========");
             consume2();
-        } catch (RpcException e) {
+        } catch (ConnectException e) {
             System.out.println("===========重连MJMQ失败，1分后重试！==========");
             try {
                 Thread.sleep(60 * 1000);

@@ -10,24 +10,19 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>mq-console</artifactId>
+    <!--MaijiaMQ整体打包时mq-console使用jar形式;只有在本地使用tomcat调试时，使用war形式-->
+    <!--<packaging>war</packaging>-->
 
     <dependencies>
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty</artifactId>
-            <version>${netty.version}</version>
             <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>com.maijia.mq</groupId>
             <artifactId>mq-service-support</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <!--<scope>provided</scope>-->
         </dependency>
     </dependencies>
 
@@ -59,7 +54,7 @@
     </profiles>
 
     <build>
-        <finalName>maijia_mq_dubbo</finalName>
+        <finalName>maijia_mq_console</finalName>
 
         <filters>
             <filter>profiles/${env}/build.properties</filter>

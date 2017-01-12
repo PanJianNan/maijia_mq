@@ -68,9 +68,6 @@
             <includes>
                 <!-- mqtt -->
                 <include>org.fusesource.mqtt-client:mqtt-client</include>
-
-                <!-- junit integration -->
-                <include>org.apache.activemq.tooling:activemq-junit</include>
             </includes>
         </dependencySet>
         <dependencySet>

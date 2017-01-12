@@ -6,7 +6,7 @@
 
 APP_NAME="MaijiaMQ"
 MAIN_CLASS="com.maijia.mq.console.Main"
-JAVA_OPTS="-D$APP_NAME -server"
+JAVA_OPTS="-D$APP_NAME -server -Xms512m -Xmx512m -XX:MaxDirectMemorySize=64m -XX:PermSize=128m -XX:MaxPermSize=128m"
 CLASSPATH=$CLASSPATH:../config
 for i in ../lib/*jar ; do
 	CLASSPATH=$CLASSPATH:$i

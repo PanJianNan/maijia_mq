@@ -9,6 +9,7 @@
 	<artifactId>mq-leveldb</artifactId>
 	<name>MQ LevelDB</name>
 	<description>MQ implemented by LevelDB for store message</description>
+	<packaging>jar</packaging>
 
 	<dependencies>
 		<dependency>
