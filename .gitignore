@@ -3,3 +3,4 @@
 **/target/
 data/
 mq-console/log/
+MaijiaMQ.log*

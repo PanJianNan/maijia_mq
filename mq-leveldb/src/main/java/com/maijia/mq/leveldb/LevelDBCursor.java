@@ -10,28 +10,28 @@ import java.io.Serializable;
  */
 public class LevelDBCursor implements Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -348756876229797827L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = -348756876229797827L;
 
-	private long pageNo;
-	
-	private long index;
+    private long pageNo;
 
-	public long getPageNo() {
-		return pageNo;
-	}
+    private long index;
 
-	public void setPageNo(long pageNo) {
-		this.pageNo = pageNo;
-	}
+    public long getPageNo() {
+        return pageNo;
+    }
 
-	public long getIndex() {
-		return index;
-	}
+    public void setPageNo(long pageNo) {
+        this.pageNo = pageNo;
+    }
 
-	public void setIndex(long index) {
-		this.index = index;
-	}
+    public long getIndex() {
+        return index;
+    }
+
+    public void setIndex(long index) {
+        this.index = index;
+    }
 }

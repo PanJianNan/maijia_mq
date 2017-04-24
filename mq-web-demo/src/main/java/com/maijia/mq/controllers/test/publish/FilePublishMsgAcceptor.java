@@ -20,8 +20,9 @@ public class FilePublishMsgAcceptor extends AbstractMessageAcceptor {
 
     String queueName = "test.file.publish2-1";
     String exchangeName = "file.ex1";
-    String host = "192.168.102.137";
-//    String host = "127.0.0.1";
+    //    String host = "192.168.52.102";
+//    String host = "192.168.102.137";
+    String host = "127.0.0.1";
 
     @PostConstruct
     public void fire() {

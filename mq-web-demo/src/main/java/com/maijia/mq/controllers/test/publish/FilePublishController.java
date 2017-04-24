@@ -23,13 +23,14 @@ import java.util.*;
 @RestController
 @RequestMapping(value = "test/file/publish")
 public class FilePublishController {
-//    @Resource
+    //    @Resource
     private IFileMqService fileMqService;
 
     String queueName = "test.file.publish1-1";
     String exchangeName = "file.ex1";
-    String host = "192.168.102.137";
-//String host = "127.0.0.1";
+    //    String host = "192.168.52.102";
+//    String host = "192.168.102.137";
+    String host = "127.0.0.1";
 
     @RequestMapping(value = "produce")
     public String produce(final String msg) throws IOException, InterruptedException {
@@ -40,7 +41,7 @@ public class FilePublishController {
         channel.queueDeclare(queueName);
         channel.exchangeDeclare(exchangeName, ExchangeType.DIRECT);
         channel.setMqService(fileMqService);
-        for (int i=0; i<10; i++) {
+        for (int i = 0; i < 10; i++) {
             Timer timer = new Timer();
             timer.schedule(new TimerTask() {
                 @Override
@@ -76,7 +77,7 @@ public class FilePublishController {
         final Channel channel = connection.createChannel();
         channel.setMqService(factory.getMqService());
         channel.exchangeDeclare(exchangeName, ExchangeType.FANOUT);
-        for (int i=0; i<10; i++) {
+        for (int i = 0; i < 10; i++) {
             Timer timer = new Timer();
             timer.schedule(new TimerTask() {
                 @Override
@@ -161,7 +162,7 @@ public class FilePublishController {
     }
 
     private void retryLink2() throws IOException {
-        try  {
+        try {
             System.out.println("===========尝试重连MJMQ==========");
             consume2();
         } catch (ConnectException e) {

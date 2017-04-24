@@ -10,18 +10,18 @@ import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.stream.ChunkedWriteHandler;
 
 
-public class HttpChannelPipelineFactory implements ChannelPipelineFactory{
+public class HttpChannelPipelineFactory implements ChannelPipelineFactory {
 
-	public ChannelPipeline getPipeline() throws Exception {
+    public ChannelPipeline getPipeline() throws Exception {
 
-		ChannelPipeline pipeline = Channels.pipeline();
-		pipeline.addLast("decoder", new HttpRequestDecoder());//upstream
-		pipeline.addLast("aggregator",new HttpChunkAggregator(1024*1024*1024));//upstream
-		pipeline.addLast("encoder", new HttpResponseEncoder());//downstream
-		pipeline.addLast("streamer", new ChunkedWriteHandler());//upstream and downstream
-		pipeline.addLast("api", new ApiHandler());//upstream
+        ChannelPipeline pipeline = Channels.pipeline();
+        pipeline.addLast("decoder", new HttpRequestDecoder());//upstream
+        pipeline.addLast("aggregator", new HttpChunkAggregator(1024 * 1024 * 1024));//upstream
+        pipeline.addLast("encoder", new HttpResponseEncoder());//downstream
+        pipeline.addLast("streamer", new ChunkedWriteHandler());//upstream and downstream
+        pipeline.addLast("api", new ApiHandler());//upstream
 //		pipeline.addLast("handler", new ControlHandler());//upstream
-		return pipeline;
-	}
+        return pipeline;
+    }
 
 }

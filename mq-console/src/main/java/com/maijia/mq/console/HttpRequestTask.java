@@ -21,7 +21,7 @@ public class HttpRequestTask<T extends MessageEvent> extends AbstractTask<T> {
 	public void processTaskQueue() {
 		while (true) {
 			//从队列里面取出e
-			T e=null;
+			T e;
 			try {
 				e = taskQueue.take();
 				

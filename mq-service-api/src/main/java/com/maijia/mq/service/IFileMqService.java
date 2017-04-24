@@ -5,7 +5,7 @@ package com.maijia.mq.service;
  * 优点：占用内存最小，消息落体不丢失
  * 缺点：速度最慢，暂不支持分布式
  *
- * @author panjn                   
+ * @author panjn
  * @date 2016/10/26
  */
 public interface IFileMqService extends IMqService {

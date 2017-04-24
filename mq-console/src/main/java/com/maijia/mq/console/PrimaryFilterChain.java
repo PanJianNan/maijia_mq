@@ -25,7 +25,7 @@ public class PrimaryFilterChain extends FilterChain {
 
     @Override
     public void processReturn(MessageEvent e, CheckResult type) {
-        String returnMsg = "";
+        String returnMsg;
         switch (type) {
             case OK:
                 return;

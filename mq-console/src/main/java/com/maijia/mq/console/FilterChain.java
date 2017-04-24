@@ -8,9 +8,9 @@ import org.jboss.netty.channel.MessageEvent;
 
 public abstract class FilterChain {
 
-    final protected static Logger log = Logger.getLogger(FilterChain.class);
+    protected static final Logger LOGGER = Logger.getLogger(FilterChain.class);
 
-    private TreeMap<Integer, AbstractFilter> sortedFilter = new TreeMap<Integer, AbstractFilter>();
+    private TreeMap<Integer, AbstractFilter> sortedFilter = new TreeMap<>();
 
     private AbstractFilter firstFilter = null;
 
@@ -21,7 +21,6 @@ public abstract class FilterChain {
     public abstract void createChain();
 
     public void addToChain(Integer order, AbstractFilter filter) {
-
         if (sortedFilter.size() == 0) {
             firstFilter = filter;
         }
@@ -29,7 +28,6 @@ public abstract class FilterChain {
         sortedFilter.put(order, filter);
 
         if (sortedFilter.size() > 1) {
-
             Object keys[] = sortedFilter.keySet().toArray();
             sortedFilter.get(keys[keys.length - 2]).setSuccessor(filter);
         }
@@ -40,7 +38,7 @@ public abstract class FilterChain {
             AbstractFilter.CheckResult returnType = firstFilter.filter(requestModel);
             processReturn((MessageEvent) requestModel, returnType);
         } catch (Exception e) {
-            log.error(e);
+            LOGGER.error(e);
         }
     }
 

@@ -14,6 +14,9 @@ public class SpringContext {
 
     private static ApplicationContext applicationContext;
 
+    /**
+     * 初始化spring容器
+     */
     public static void initSpringContext() {
         String[] configs = {"classpath*:spring/spring-*.xml"};
         applicationContext = new FileSystemXmlApplicationContext(configs);

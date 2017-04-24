@@ -10,13 +10,15 @@ import org.apache.log4j.Logger;
  * @date 2017/1/11
  */
 public class ShutdownHook extends Thread {
+
     private static final Logger LOGGER = Logger.getLogger(ShutdownHook.class);
 
     @Override
     public void run() {
-        LOGGER.info("shut down the server!");
+        LOGGER.info("start shut down the server!");
         ServerManager serverManager = ServerManager.getInstance();//获取服务器管理实例
         serverManager.shutDownThreadPool();
         serverManager.shutDownNetty();
+        LOGGER.info("shut down the server success!");
     }
 }

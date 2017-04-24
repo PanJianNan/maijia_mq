@@ -24,6 +24,13 @@
             <groupId>com.maijia.mq</groupId>
             <artifactId>mq-service-support</artifactId>
         </dependency>
+
+        <!-- Servelt -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>${version.servlet3}</version>
+        </dependency>
     </dependencies>
 
     <profiles>

@@ -27,7 +27,7 @@ import org.jboss.netty.handler.codec.http.HttpVersion;
  * Http服务器
  */
 public class HttpServer {
-    //服务端启动类
+
     private static final Logger LOGGER = Logger.getLogger(HttpServer.class);
 
     //creates a new server-side Channel and accepts incoming connections

@@ -21,20 +21,25 @@ public class ServerManager {
     /**
      * 单例实例
      */
-    private static ServerManager serverManager = null;
+    private volatile static ServerManager serverManager = null;
 
     private ServerManager() {
 
     }
 
     /**
-     * 获取实例
+     * 获取服务器管理单例
+     * 懒汉模式改良版（double-check）
      *
      * @return ServerManager
      */
     public static ServerManager getInstance() {
         if (serverManager == null) {
-            serverManager = new ServerManager();
+            synchronized (ServerManager.class) {
+                if (serverManager == null) {
+                    serverManager = new ServerManager();
+                }
+            }
         }
         return serverManager;
     }
@@ -45,7 +50,7 @@ public class ServerManager {
     private void initSpringContext() {
         LOGGER.info("初始化Spring容器！");
         long s = System.currentTimeMillis();
-        SpringContext.initSpringContext();//初始化spring容器
+        SpringContext.initSpringContext();//初始化Spring容器
         long e = System.currentTimeMillis();
         LOGGER.info("初始化Spring容器成功，耗时：" + (e - s) + "ms！");
     }
@@ -105,8 +110,8 @@ public class ServerManager {
     public void startServer(String args[]) {
         param = resolveParam(args);
         LOGGER.info("服务器开始启动！");
-        this.printJDKinfo();
-        Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+        this.printJvmInfo();
+        Runtime.getRuntime().addShutdownHook(new ShutdownHook());//关闭服务器时的回调钩子
 
         long s0 = System.currentTimeMillis();
 
@@ -114,7 +119,7 @@ public class ServerManager {
         this.initHttpServer(Util.getIntOfObj(param.get("port")));//初始化netty服务器
         this.initThreadPool();//初始化线程池
 
-        this.initParams();//
+        this.initParams();//初始化业务参数
 
         this.printJvmInfo();
         long s1 = System.currentTimeMillis();
@@ -140,11 +145,11 @@ public class ServerManager {
         LOGGER.info("JVM 可获得的最大内存大小：" + Util.parseDoubleToStr(JvmInfo.getMaxMemory() / (double) 1024, "#.##") + " MB!");
         LOGGER.info("JVM 当前已分配到的内存大小：" + Util.parseDoubleToStr(JvmInfo.getTotalMemory() / (double) 1024, "#.##") + " MB!");
         LOGGER.info("JVM 当前可用的内存大小：" + Util.parseDoubleToStr(JvmInfo.getFreeMemory() / (double) 1024, "#.##") + " MB!");
-        LOGGER.info("JDK 信息：" + JvmInfo.getJDKInfo());
+        JvmInfo.getJDKInfo();
     }
 
     public void printJDKinfo() {
-//        log.info("JDK 信息：" + JvmInfo.getJDKInfo());
+        LOGGER.info("JDK 信息：" + JvmInfo.getJDKInfo());
     }
 
     private Map<String, String> resolveParam(String[] args) {

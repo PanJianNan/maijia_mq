@@ -1,9 +1,15 @@
 package com.maijia.mq.console;
 
+/**
+ * JVM信息
+ *
+ * @author panjn
+ * @date 2017/1/11
+ */
 public class JvmInfo {
 
     /**
-     * 获取jvm可用内存大小,单位为KB
+     * JVM当前可用内存大小,单位为KB
      *
      * @return
      */
@@ -13,7 +19,7 @@ public class JvmInfo {
     }
 
     /**
-     * 获取jvm内存大小，单位为KB
+     * JVM现在已经向操作系统申请的内存大小，单位为KB
      *
      * @return
      */
@@ -23,7 +29,7 @@ public class JvmInfo {
     }
 
     /**
-     * 获取jvm内存大小，单位为KB
+     * JVM能向操作系统申请的最大内存，单位为KB
      *
      * @return
      */
@@ -42,7 +48,6 @@ public class JvmInfo {
     }
 
     public static String getJDKInfo() {
-
         String version = System.getProperty("java.version");
         String bit = System.getProperty("sun.arch.data.model");
         return version + " " + bit + "bit";

@@ -47,6 +47,5 @@ public class Message<E> implements Serializable {
         System.out.println(message);
 
 
-
     }
 }
