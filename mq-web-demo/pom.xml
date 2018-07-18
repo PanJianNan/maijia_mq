@@ -25,11 +25,7 @@
         <!--消息队列-->
         <dependency>
             <groupId>com.maijia.mq</groupId>
-            <artifactId>mq-domain</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.maijia.mq</groupId>
-            <artifactId>mq-service-api</artifactId>
+            <artifactId>mq-client</artifactId>
         </dependency>
     </dependencies>
 
@@ -84,8 +80,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.5.1</version>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>

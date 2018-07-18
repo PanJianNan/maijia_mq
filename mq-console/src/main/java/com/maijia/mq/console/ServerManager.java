@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public class ServerManager {
 
-    private static final Logger LOGGER = Logger.getLogger(ServerManager.class);
+    private final Logger logger = Logger.getLogger(this.getClass());
 
     private static volatile boolean isServerStart = false;
 
@@ -48,23 +48,23 @@ public class ServerManager {
      * 初始化Spring容器
      */
     private void initSpringContext() {
-        LOGGER.info("初始化Spring容器！");
+        logger.info("初始化Spring容器！");
         long s = System.currentTimeMillis();
         SpringContext.initSpringContext();//初始化Spring容器
         long e = System.currentTimeMillis();
-        LOGGER.info("初始化Spring容器成功，耗时：" + (e - s) + "ms！");
+        logger.info("初始化Spring容器成功，耗时：" + (e - s) + "ms！");
     }
 
     /**
      * 启动netty服务器
      */
     private void initHttpServer(int port) {
-        LOGGER.info("启动netty服务器！");
+        logger.info("启动netty服务器！");
         long s = System.currentTimeMillis();
         //端口号在核心模块配置
         HttpServer.init(port);
         long e = System.currentTimeMillis();
-        LOGGER.info("启动netty服务器成功，耗时：" + (e - s) + "ms！");
+        logger.info("启动netty服务器成功，耗时：" + (e - s) + "ms！");
     }
 
     /**
@@ -79,12 +79,12 @@ public class ServerManager {
      * 初始化业务参数
      */
     private void initParams() {
-        LOGGER.info("初始化各模块业务参数……");
+        logger.info("初始化各模块业务参数……");
         long s = System.currentTimeMillis();
 //		InitParamUtil.init();
 //		SchedulerManager.init();
         long e = System.currentTimeMillis();
-        LOGGER.info("初始化各模块业务参数成功，耗时：" + (e - s) + "ms！");
+        logger.info("初始化各模块业务参数成功，耗时：" + (e - s) + "ms！");
     }
 
     /**
@@ -109,7 +109,7 @@ public class ServerManager {
      */
     public void startServer(String args[]) {
         param = resolveParam(args);
-        LOGGER.info("服务器开始启动！");
+        logger.info("服务器开始启动！");
         this.printJvmInfo();
         Runtime.getRuntime().addShutdownHook(new ShutdownHook());//关闭服务器时的回调钩子
 
@@ -121,10 +121,22 @@ public class ServerManager {
 
         this.initParams();//初始化业务参数
 
+        this.initNIO();//初始化NIO
+
         this.printJvmInfo();
         long s1 = System.currentTimeMillis();
-        LOGGER.info("服务器启动成功，耗时：" + (s1 - s0) + "毫秒！");
+        logger.info("服务器启动成功，耗时：" + (s1 - s0) + "毫秒！");
         isServerStart = true;
+    }
+
+    /**
+     * 初始化NIO
+     */
+    private void initNIO() {
+        logger.info("init NIO thread!");
+        NioMonitorThread thread = new NioMonitorThread();
+        thread.setName("NIO monitor thread!");
+        thread.start();
     }
 
     /**
@@ -142,18 +154,18 @@ public class ServerManager {
     }
 
     public void printJvmInfo() {
-        LOGGER.info("JVM 可获得的最大内存大小：" + Util.parseDoubleToStr(JvmInfo.getMaxMemory() / (double) 1024, "#.##") + " MB!");
-        LOGGER.info("JVM 当前已分配到的内存大小：" + Util.parseDoubleToStr(JvmInfo.getTotalMemory() / (double) 1024, "#.##") + " MB!");
-        LOGGER.info("JVM 当前可用的内存大小：" + Util.parseDoubleToStr(JvmInfo.getFreeMemory() / (double) 1024, "#.##") + " MB!");
+        logger.info("JVM 可获得的最大内存大小：" + Util.parseDoubleToStr(JvmInfo.getMaxMemory() / (double) 1024, "#.##") + " MB!");
+        logger.info("JVM 当前已分配到的内存大小：" + Util.parseDoubleToStr(JvmInfo.getTotalMemory() / (double) 1024, "#.##") + " MB!");
+        logger.info("JVM 当前可用的内存大小：" + Util.parseDoubleToStr(JvmInfo.getFreeMemory() / (double) 1024, "#.##") + " MB!");
         JvmInfo.getJDKInfo();
     }
 
     public void printJDKinfo() {
-        LOGGER.info("JDK 信息：" + JvmInfo.getJDKInfo());
+        logger.info("JDK 信息：" + JvmInfo.getJDKInfo());
     }
 
     private Map<String, String> resolveParam(String[] args) {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         for (int i = 0; i < args.length; i++) {
             String[] kV = args[i].split(":");
             map.put(kV[0], kV[1]);

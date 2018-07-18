@@ -7,5 +7,5 @@ package com.maijia.mq.client;
  * @date 2017/1/2
  */
 public enum FactoryMode {
-    FAST, CACHE, FILE;
+    FAST, CACHE, FILE
 }

@@ -32,7 +32,8 @@
         <init-param>
             <description>加载/WEB-INF/spring/目录下的所有XML作为Spring MVC的配置文件</description>
             <param-name>contextConfigLocation</param-name>
-            <param-value>classpath:/spring/spring-*.xml</param-value>
+            <!--<param-value>classpath:/spring/spring-*.xml</param-value>-->
+            <param-value>classpath:/spring/spring-web.xml,classpath:/spring/spring-cache-default.xml</param-value><!--TODO 暂不链接redis，redis最好可以改成可开关的模式-->
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>

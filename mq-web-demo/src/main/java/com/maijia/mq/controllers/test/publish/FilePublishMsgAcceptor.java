@@ -10,7 +10,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 
 /**
- * FastPublishAcceptor
+ * 测试消息接收器
  *
  * @author panjn
  * @date 2016/12/29
@@ -18,10 +18,8 @@ import java.io.IOException;
 @Component
 public class FilePublishMsgAcceptor extends AbstractMessageAcceptor {
 
-    String queueName = "test.file.publish2-1";
+    String queueName = "test.file.publish2-1-ceshi";
     String exchangeName = "file.ex1";
-    //    String host = "192.168.52.102";
-//    String host = "192.168.102.137";
     String host = "127.0.0.1";
 
     @PostConstruct
@@ -36,10 +34,10 @@ public class FilePublishMsgAcceptor extends AbstractMessageAcceptor {
         factory.setHost(host);
         factory.setPort(3198);
         factory.setMode(FactoryMode.FILE);
+
         Connection connection = factory.newConnection();
-//        Connection connection = fileMqService.newConnection(host);
         Channel channel = connection.createChannel();
-        channel.queueDeclare(queueName);
+        channel.queueDeclare(queueName);//注册需要消息队列名
         channel.setMqService(factory.getMqService());//尴尬
         channel.exchangeDeclare(exchangeName);
 

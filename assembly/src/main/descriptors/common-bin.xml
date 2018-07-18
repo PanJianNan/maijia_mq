@@ -60,16 +60,16 @@
             </includes>
         </dependencySet>
 
-        <dependencySet>
+        <!--<dependencySet>
             <outputDirectory>/lib/extra</outputDirectory>
             <unpack>false</unpack>
             <scope>runtime</scope>
             <useTransitiveFiltering>true</useTransitiveFiltering>
             <includes>
-                <!-- mqtt -->
+                &lt;!&ndash; mqtt &ndash;&gt;
                 <include>org.fusesource.mqtt-client:mqtt-client</include>
             </includes>
-        </dependencySet>
+        </dependencySet>-->
         <dependencySet>
             <outputDirectory>/lib/web</outputDirectory>
             <unpack>false</unpack>

@@ -11,9 +11,7 @@ import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.SerializationUtils;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
@@ -24,21 +22,31 @@ import java.util.*;
  * @author panjn
  * @date 2016/12/3
  */
-@Component
 public class RedisCacheImpl implements ICacheService {
 
     private final Logger logger = Logger.getLogger(this.getClass());
 
-    @Resource
     private RedisTemplate<String, Serializable> redisTemplate;
 
     private static final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
     private static final JdkSerializationRedisSerializer jdkSerializationRedisSerializer = new JdkSerializationRedisSerializer();
 
+    public RedisTemplate<String, Serializable> getRedisTemplate() {
+        return redisTemplate;
+    }
+
+    public void setRedisTemplate(RedisTemplate<String, Serializable> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
+
     @Override
     public long del(final String... keys) {
-        return (long) redisTemplate.execute(new RedisCallback<Long>() {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
+        return redisTemplate.execute(new RedisCallback<Long>() {
             public Long doInRedis(RedisConnection connection) throws DataAccessException {
                 byte[][] bytes = new byte[keys.length][];
                 int index = 0;
@@ -51,6 +59,10 @@ public class RedisCacheImpl implements ICacheService {
     }
 
     public void set(final byte[] key, final byte[] value, final long liveTime) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         redisTemplate.execute(new RedisCallback<Object>() {
             public Object doInRedis(RedisConnection connection) throws DataAccessException {
                 connection.setEx(key, liveTime, value);
@@ -74,6 +86,10 @@ public class RedisCacheImpl implements ICacheService {
 
     @Override
     public <T> T get(final String key) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<T>() {
             public T doInRedis(RedisConnection connection) throws DataAccessException {
                 byte[] bs = connection.get(rawKey(key));
@@ -84,6 +100,10 @@ public class RedisCacheImpl implements ICacheService {
 
     @Override
     public Set<String> keys(final String pattern) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<Set<String>>() {
             public Set<String> doInRedis(RedisConnection connection) throws DataAccessException {
                 Set<byte[]> rawKeys = connection.keys(rawKey(pattern));
@@ -94,6 +114,10 @@ public class RedisCacheImpl implements ICacheService {
 
     @Override
     public List<String> scan(final String pattern, final long count) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<List<String>>() {
             @Override
             public List<String> doInRedis(RedisConnection connection) throws DataAccessException {
@@ -114,6 +138,10 @@ public class RedisCacheImpl implements ICacheService {
 
     @Override
     public boolean exists(final String key) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<Boolean>() {
             public Boolean doInRedis(RedisConnection connection) throws DataAccessException {
                 return connection.exists(rawKey(key));
@@ -123,6 +151,10 @@ public class RedisCacheImpl implements ICacheService {
 
     @Override
     public boolean expire(final String key, final long liveTime) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<Boolean>() {
             public Boolean doInRedis(RedisConnection connection) throws DataAccessException {
                 return connection.expire(rawKey(key), liveTime);
@@ -132,6 +164,10 @@ public class RedisCacheImpl implements ICacheService {
 
     @Override
     public long ttl(final String key) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<Long>() {
             public Long doInRedis(RedisConnection connection) throws DataAccessException {
                 return connection.ttl(rawKey(key));
@@ -141,6 +177,10 @@ public class RedisCacheImpl implements ICacheService {
 
 //    @Override
 //    public void flushDB(){
+//        if (redisTemplate == null) {
+//            logger.error("redis config is error, please setting mjmq.properties");
+//            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+//        }
 //        redisTemplate.execute(new RedisCallback<Object>() {
 //            public Object doInRedis(RedisConnection connection) throws DataAccessException {
 //                connection.flushDb();
@@ -151,6 +191,10 @@ public class RedisCacheImpl implements ICacheService {
 
     @Override
     public long dbSize() {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<Long>() {
             public Long doInRedis(RedisConnection connection) throws DataAccessException {
                 return connection.dbSize();
@@ -160,6 +204,10 @@ public class RedisCacheImpl implements ICacheService {
 
     @Override
     public String ping() {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<String>() {
             public String doInRedis(RedisConnection connection) throws DataAccessException {
                 return connection.ping();
@@ -169,6 +217,10 @@ public class RedisCacheImpl implements ICacheService {
 
     @Override
     public boolean hSet(final String key, final String field, final Object value) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<Boolean>() {
             public Boolean doInRedis(RedisConnection connection) throws DataAccessException {
                 return connection.hSet(rawKey(key), rawKey(field), rawValue(value));
@@ -178,6 +230,10 @@ public class RedisCacheImpl implements ICacheService {
 
     @Override
     public <T> T hGet(final String key, final String field) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<T>() {
             public T doInRedis(RedisConnection connection) throws DataAccessException {
                 return (T) deserializeValue(connection.hGet(rawKey(key), rawKey(field)));
@@ -187,6 +243,10 @@ public class RedisCacheImpl implements ICacheService {
 
     @Override
     public Set<String> hKeys(final String key) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<Set<String>>() {
             public Set<String> doInRedis(RedisConnection connection) throws DataAccessException {
                 return SerializationUtils.deserialize(connection.hKeys(rawKey(key)), stringRedisSerializer);
@@ -196,6 +256,10 @@ public class RedisCacheImpl implements ICacheService {
 
     @Override
     public long hDel(final String key, final String... fields) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<Long>() {
             public Long doInRedis(RedisConnection connection) throws DataAccessException {
                 byte[][] bytes = new byte[fields.length][];
@@ -210,6 +274,10 @@ public class RedisCacheImpl implements ICacheService {
 
     @Override
     public void hMSet(final String key, final Map<String, Object> hashes) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         redisTemplate.execute(new RedisCallback<Object>() {
             public Object doInRedis(RedisConnection connection) throws DataAccessException {
                 Map<byte[], byte[]> newHashes = new HashMap<byte[], byte[]>(hashes.size());
@@ -224,6 +292,10 @@ public class RedisCacheImpl implements ICacheService {
 
     @Override
     public long lPush(final String key, final Object... values) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<Long>() {
             public Long doInRedis(RedisConnection connection) throws DataAccessException {
                 byte[][] bytes = new byte[values.length][];
@@ -247,6 +319,10 @@ public class RedisCacheImpl implements ICacheService {
      */
     @Override
     public long rPush(final String key, final Object... values) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<Long>() {
             public Long doInRedis(RedisConnection connection) throws DataAccessException {
                 byte[][] bytes = new byte[values.length][];
@@ -261,6 +337,10 @@ public class RedisCacheImpl implements ICacheService {
 
     @Override
     public List<Object> lRange(final String key, final long begin, final long end) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<List<Object>>() {
             public List<Object> doInRedis(RedisConnection connection) throws DataAccessException {
                 List<byte[]> rawValues = connection.lRange(rawKey(key), begin, end);
@@ -271,6 +351,10 @@ public class RedisCacheImpl implements ICacheService {
 
     @Override
     public long lRem(final String key, final long count, final Object value) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<Long>() {
             public Long doInRedis(RedisConnection connection) throws DataAccessException {
                 return connection.lRem(rawKey(key), count, rawValue(value));
@@ -280,6 +364,10 @@ public class RedisCacheImpl implements ICacheService {
 
     @Override
     public void lTrim(final String key, final long begin, final long end) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         redisTemplate.execute(new RedisCallback<Object>() {
             public Object doInRedis(RedisConnection connection) throws DataAccessException {
                 connection.lTrim(rawKey(key), begin, end);
@@ -290,6 +378,10 @@ public class RedisCacheImpl implements ICacheService {
 
     @Override
     public Object lPop(final String key) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<Object>() {
             public Object doInRedis(RedisConnection connection) throws DataAccessException {
                 return deserializeValue(connection.lPop(rawKey(key)));
@@ -306,6 +398,10 @@ public class RedisCacheImpl implements ICacheService {
      */
     @Override
     public Object rPop(final String key) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<Object>() {
             public Object doInRedis(RedisConnection connection) throws DataAccessException {
                 return deserializeValue(connection.rPop(rawKey(key)));
@@ -315,6 +411,10 @@ public class RedisCacheImpl implements ICacheService {
 
     @Override
     public long lLen(final String key, final long begin, final long end) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<Long>() {
             public Long doInRedis(RedisConnection connection) throws DataAccessException {
                 return connection.lLen(rawKey(key));
@@ -332,6 +432,10 @@ public class RedisCacheImpl implements ICacheService {
      */
     @Override
     public Object bLPop(final int timeout, final String key) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<Object>() {
             public Object doInRedis(RedisConnection connection) throws DataAccessException {
                 List<byte[]> list = connection.bLPop(timeout, rawKey(key));
@@ -350,6 +454,10 @@ public class RedisCacheImpl implements ICacheService {
      */
     @Override
     public Object bRPop(final int timeout, final String key) {
+        if (redisTemplate == null) {
+            logger.error("redis config is error, please setting mjmq.properties");
+            throw new RuntimeException("redis config is error, please setting mjmq.properties");
+        }
         return redisTemplate.execute(new RedisCallback<Object>() {
             public Object doInRedis(RedisConnection connection) throws DataAccessException {
                 List<byte[]> list = connection.bRPop(timeout, rawKey(key));

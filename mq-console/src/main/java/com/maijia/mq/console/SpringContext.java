@@ -1,8 +1,12 @@
 package com.maijia.mq.console;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
+
+import java.io.*;
+import java.util.Properties;
 
 /**
  * spring容器初始化类，并提供从容器中获取对象的方法
@@ -12,13 +16,38 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
  */
 public class SpringContext {
 
+    private static final Logger LOGGER = Logger.getLogger(ServerManager.class);
+
     private static ApplicationContext applicationContext;
 
     /**
      * 初始化spring容器
      */
     public static void initSpringContext() {
-        String[] configs = {"classpath*:spring/spring-*.xml"};
+
+        String[] configs = {"classpath*:spring/spring-web.xml", "classpath*:spring/spring-cache-default.xml"};
+
+        String path = SpringContext.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        File file = new File(path);
+        if (file != null) {
+            path = file.getParentFile().getParentFile().getAbsolutePath();
+            path = path + "/conf/mjmq.properties";
+
+            try (InputStream in = new BufferedInputStream(new FileInputStream(path))) {
+                Properties p = new Properties();
+                p.load(in);
+                String useredis = p.getProperty("useredis");
+                if ("true".equals(useredis)) {
+                    configs = new String[]{"classpath*:spring/spring-web.xml", "classpath*:spring/spring-redis.xml"};
+                }
+            } catch (FileNotFoundException e) {
+                LOGGER.warn("missing mjmq.properties");
+            } catch (IOException e) {
+                e.printStackTrace();
+                LOGGER.error(e.getMessage(), e);
+            }
+        }
+
         applicationContext = new FileSystemXmlApplicationContext(configs);
     }
 

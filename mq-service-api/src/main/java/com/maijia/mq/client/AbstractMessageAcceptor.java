@@ -41,7 +41,7 @@ public abstract class AbstractMessageAcceptor {
         } catch (ConnectException e) {
             logger.info("===========重连MJMQ失败，1分后重试！==========");
             try {
-                Thread.sleep(60 * 1000);
+                Thread.sleep(60 * 1000L);
                 retryLink();
             } catch (InterruptedException e1) {
                 logger.error(e1);

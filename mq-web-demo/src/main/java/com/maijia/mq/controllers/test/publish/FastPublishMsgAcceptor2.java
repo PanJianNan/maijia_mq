@@ -16,9 +16,9 @@ import java.io.IOException;
  * @date 2016/12/29
  */
 @Component
-public class FastPublishMsgAcceptor extends AbstractMessageAcceptor {
+public class FastPublishMsgAcceptor2 extends AbstractMessageAcceptor {
 
-    String queueName = "test.fast.publish1-1";
+    String queueName = "test.fast.publish1-2";
     String exchangeName = "fast.ex1";
 //    String host = "192.168.102.137";
     String host = "127.0.0.1";
@@ -46,7 +46,7 @@ public class FastPublishMsgAcceptor extends AbstractMessageAcceptor {
         MQConsumer consumer = new DefaultMQConsumer() {
             @Override
             public void handleDelivery(Message message) {
-                System.out.println("[fast1-1] acceptor Received '" + message.getContent() + "'");
+                System.out.println("[fast1-2] acceptor Received '" + message.getContent() + "'");
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {

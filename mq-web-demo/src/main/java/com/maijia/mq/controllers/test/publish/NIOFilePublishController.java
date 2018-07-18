@@ -1,17 +1,14 @@
 package com.maijia.mq.controllers.test.publish;
 
 import com.maijia.mq.client.*;
-import com.maijia.mq.domain.Message;
-import com.maijia.mq.service.IFastMqService;
-import com.maijia.mq.service.MQConsumer;
-import com.maijia.mq.service.impl.DefaultMQConsumer;
-import org.apache.commons.lang3.StringUtils;
+import com.maijia.mq.util.ConstantUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.io.IOException;
-import java.net.ConnectException;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -22,39 +19,63 @@ import java.util.*;
  * @date 2016/12/28
  */
 @RestController
-@RequestMapping(value = "test/fast/publish")
-public class FastPublishController {
+@RequestMapping(value = "test/file/publish/nio")
+public class NIOFilePublishController {
 
-    String queueName = "test.fast.publish1-1";
-    String exchangeName = "fast.ex1";
-//    String host = "192.168.102.137";
+    String queueName = "test.file.publish1-1";
+    String exchangeName = "file.ex1";
     String host = "127.0.0.1";
 
-    @RequestMapping(value = "produce")
+    @RequestMapping(value = "direct")
     public String produce(final String msg) throws IOException, InterruptedException {
-        if (StringUtils.isBlank(msg)) {
+
+        //1. 获取通道
+        SocketChannel sChannel = SocketChannel.open(new InetSocketAddress(host, ConstantUtils.NIO_MSG_TRANSFER_PORT));
+
+        //2. 切换非阻塞模式
+        sChannel.configureBlocking(false);
+
+        //3. 分配指定大小的缓冲区
+        ByteBuffer buf = ByteBuffer.allocate(1024);
+
+        //4. 发送数据给服务端
+        Scanner scan = new Scanner(System.in);
+
+        while(scan.hasNext()){
+            String str = scan.next();
+            if ("-1".equals(str)) {
+                break;
+            }
+            buf.put((new Date().toString() + "\n" + str).getBytes());
+            buf.flip();
+            sChannel.write(buf);
+            buf.clear();
+        }
+
+        //5. 关闭通道
+        sChannel.close();
+
+       /* if (msg == null) {
             throw new IllegalArgumentException("msg is empty");
         }
         // 创建连接工厂
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(host);
         factory.setPort(3198);
-        factory.setMode(FactoryMode.FAST);
+        factory.setMode(FactoryMode.FILE);
         Connection connection = factory.newConnection();
         final Channel channel = connection.createChannel();
         channel.setMqService(factory.getMqService());
         channel.queueDeclare(queueName);
         channel.exchangeDeclare(exchangeName, ExchangeType.DIRECT);
-
         for (int i = 0; i < 10; i++) {
-//            Timer timer = new Timer();
-//            timer.schedule(new TimerTask() {
-//                @Override
-//                public void run() {
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
                     Map<String, Object> map = new HashMap<>();
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    map.put("msg", msg);
-                    map.put("time", simpleDateFormat.format(new Date()) + " | fast | direct");
+                    map.put("time", simpleDateFormat.format(new Date()) + "_direct");
                     try {
                         channel.basicPublish(map);
                     } catch (IOException e) {
@@ -62,38 +83,35 @@ public class FastPublishController {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-//                }
-//            }, 0, 1000);
-        }
+                }
+            }, 0, 1000);
+        }*/
 
         return "produce success";
     }
 
     @RequestMapping(value = "broadcast")
-    public String broadcast(final String msg) throws IOException, InterruptedException {
-        if (StringUtils.isBlank(msg)) {
+    public String broadcast(String msg) throws IOException, InterruptedException {
+        if (msg == null) {
             throw new IllegalArgumentException("msg is empty");
         }
         // 创建连接工厂
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(host);
         factory.setPort(3198);
-        factory.setMode(FactoryMode.FAST);
+        factory.setMode(FactoryMode.FILE);
         Connection connection = factory.newConnection();
         final Channel channel = connection.createChannel();
         channel.setMqService(factory.getMqService());
-        channel.queueDeclare(queueName);
         channel.exchangeDeclare(exchangeName, ExchangeType.FANOUT);
-
         for (int i = 0; i < 10; i++) {
-//            Timer timer = new Timer();
-//            timer.schedule(new TimerTask() {
-//                @Override
-//                public void run() {
+            Timer timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
                     Map<String, Object> map = new HashMap<>();
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    map.put("msg", msg);
-                    map.put("time", simpleDateFormat.format(new Date()) + " | fast | fanout");
+                    map.put("time", simpleDateFormat.format(new Date()) + "_broadcast");
                     try {
                         channel.basicPublish(map);
                     } catch (IOException e) {
@@ -101,10 +119,10 @@ public class FastPublishController {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-//                }
-//            }, 0, 1000);
+                }
+            }, 0, 1000);
         }
-
+//        channel.basicPublish(msg);
         return "produce success";
     }
 

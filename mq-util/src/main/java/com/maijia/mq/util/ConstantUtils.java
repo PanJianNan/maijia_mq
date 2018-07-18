@@ -11,6 +11,11 @@ public class ConstantUtils {
     /** 缓存key前缀 */
     public static final String CACHE_KEY_PREFIX = "maijia_mq:";
 
+    /** 服务端口 */
+    public static final int SERVER_PORT = 3198;
+    /** NIO模式消息传输端口 */
+    public static final int NIO_MSG_TRANSFER_PORT = 3985;
+
     private ConstantUtils() {
     }
 
