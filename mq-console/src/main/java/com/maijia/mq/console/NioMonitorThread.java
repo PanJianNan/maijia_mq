@@ -42,14 +42,14 @@ public class NioMonitorThread extends Thread {
     @Override
     public void run() {
         try {
-            //1. 获取通道
+            //1. 获取选择器
+            Selector selector = Selector.open();
+            //2. 获取通道
             ServerSocketChannel ssChannel = ServerSocketChannel.open();
-            //2. 切换非阻塞模式
-            ssChannel.configureBlocking(false);
             //3. 绑定连接
             ssChannel.bind(new InetSocketAddress(ConstantUtils.NIO_MSG_TRANSFER_PORT));
-            //4. 获取选择器
-            Selector selector = Selector.open();
+            //4. 切换非阻塞模式
+            ssChannel.configureBlocking(false);
             //5. 将通道注册到选择器上, 并且指定“监听接收事件”
             ssChannel.register(selector, SelectionKey.OP_ACCEPT);
             //6. 轮询式的获取选择器上已经“准备就绪”的事件
@@ -68,11 +68,11 @@ public class NioMonitorThread extends Thread {
                             //10. 若“接收就绪”，获取客户端连接
                             SocketChannel sChannel = ssChannel.accept();
 
-                            //11. 切换非阻塞模式
+                            //11. 将客户端的Channel切换成非阻塞模式
                             sChannel.configureBlocking(false);
 
                             //12. 将该通道注册到选择器上
-                            sChannel.register(selector, SelectionKey.OP_READ);
+//                            sChannel.register(selector, SelectionKey.OP_READ);
                         } else if (sk.isReadable()) {
                             //13. 获取当前选择器上“读就绪”状态的通道
                             SocketChannel sChannel = (SocketChannel) sk.channel();
@@ -94,6 +94,7 @@ public class NioMonitorThread extends Thread {
                                 oos.writeObject(message);
                                 ByteBuffer msgBuf = ByteBuffer.allocate(1024);
                                 msgBuf.put(baos.toByteArray());
+                                msgBuf.flip();
                                 sChannel.write(msgBuf);
                             }
                         } /*else if () {

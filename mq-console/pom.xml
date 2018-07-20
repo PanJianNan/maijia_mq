@@ -29,6 +29,7 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
+            <!--<scope>provided</scope>--><!--如果mq-console模块使用web容器启动，需要provided-->
         </dependency>
     </dependencies>
 

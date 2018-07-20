@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.ServerSocket;
@@ -40,9 +39,9 @@ public class RpcFramework {
             throw new IllegalArgumentException("service is null");
         }
         if (port <= 0 || port > 65535) {
-            throw new IllegalArgumentException("Invalid port " + port);
+            throw new IllegalArgumentException(String.format("Invalid port %d ", port));
         }
-        LOGGER.info("Export service " + service.getClass().getName() + " on port " + port);
+        LOGGER.info(String.format("Export service %s on port %d", service.getClass().getName(), port));
         //save reference map
         REFERENCE_MAP.put(interfaceClass.getName(), service);
 
@@ -53,49 +52,38 @@ public class RpcFramework {
         final ServerSocket serverSocket = new ServerSocket(port);
         SERVER_SOCKET_MAP.put(port, serverSocket);
 
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        final Socket socket = serverSocket.accept();
+        Thread thread = new Thread(() -> {
+            while (true) {
+                try {
+                    final Socket socket = serverSocket.accept();
 
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
+                    new Thread(() -> {
+                        try {
+                            try (ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+                                 ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream())) {
+
+                                String interfaceName = input.readUTF();
+                                String methodName = input.readUTF();
+                                Class<?>[] parameterTypes = (Class<?>[]) input.readObject();
+                                Object[] arguments = (Object[]) input.readObject();
+
                                 try {
-                                    try {
-                                        ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
-                                        try {
-                                            String interfaceName = input.readUTF();
-                                            String methodName = input.readUTF();
-                                            Class<?>[] parameterTypes = (Class<?>[]) input.readObject();
-                                            Object[] arguments = (Object[]) input.readObject();
-                                            ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-                                            try {
-                                                Object target = REFERENCE_MAP.get(interfaceName);
-                                                Method method = target.getClass().getMethod(methodName, parameterTypes);
-                                                Object result = method.invoke(target, arguments);
-                                                output.writeObject(result);
-                                            } catch (Throwable t) {
-                                                output.writeObject(t);
-                                            } finally {
-                                                output.close();
-                                            }
-                                        } finally {
-                                            input.close();
-                                        }
-                                    } finally {
-                                        socket.close();
-                                    }
-                                } catch (Exception e) {
-                                    LOGGER.error(e.getMessage(), e);
+                                    Object target = REFERENCE_MAP.get(interfaceName);
+                                    Method method = target.getClass().getMethod(methodName, parameterTypes);
+                                    Object result = method.invoke(target, arguments);
+                                    output.writeObject(result);
+                                } catch (Throwable t) {
+                                    output.writeObject(t);
                                 }
+                            } finally {
+                                socket.close();
                             }
-                        }).start();
-                    } catch (Exception e) {
-                        LOGGER.error(e.getMessage(), e);
-                    }
+                        } catch (Exception e) {
+                            LOGGER.error(e.getMessage(), e);
+                        }
+                    }).start();
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage(), e);
                 }
             }
         });
@@ -119,41 +107,39 @@ public class RpcFramework {
             throw new IllegalArgumentException("Interface class == null");
         }
         if (!interfaceClass.isInterface()) {
-            throw new IllegalArgumentException("The " + interfaceClass.getName() + " must be interface class!");
+            throw new IllegalArgumentException(String.format("The %s must be interface class!", interfaceClass.getName()));
         }
         if (host == null || host.length() == 0) {
             throw new IllegalArgumentException("Host == null!");
         }
         if (port <= 0 || port > 65535) {
-            throw new IllegalArgumentException("Invalid port " + port);
+            throw new IllegalArgumentException(String.format("Invalid port %d", port));
         }
-        LOGGER.info("Get remote service " + interfaceClass.getName() + " from server " + host + ":" + port);
-        return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class<?>[]{interfaceClass}, new InvocationHandler() {
-            public Object invoke(Object proxy, Method method, Object[] arguments) throws Throwable {
-                Socket socket = new Socket(host, port);
+        LOGGER.info(String.format("Get remote service %s from server %s:%i", interfaceClass.getName(), host, port));
+        return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class<?>[]{interfaceClass}, (proxy, method, arguments) -> {
+            Socket socket = new Socket(host, port);
+            try {
+                ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
                 try {
-                    ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
+                    output.writeUTF(interfaceClass.getName());
+                    output.writeUTF(method.getName());
+                    output.writeObject(method.getParameterTypes());
+                    output.writeObject(arguments);
+                    ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
                     try {
-                        output.writeUTF(interfaceClass.getName());
-                        output.writeUTF(method.getName());
-                        output.writeObject(method.getParameterTypes());
-                        output.writeObject(arguments);
-                        ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
-                        try {
-                            Object result = input.readObject();
-                            if (result instanceof Throwable) {
-                                throw (Throwable) result;
-                            }
-                            return result;
-                        } finally {
-                            input.close();
+                        Object result = input.readObject();
+                        if (result instanceof Throwable) {
+                            throw (Throwable) result;
                         }
+                        return result;
                     } finally {
-                        output.close();
+                        input.close();
                     }
                 } finally {
-                    socket.close();
+                    output.close();
                 }
+            } finally {
+                socket.close();
             }
         });
     }

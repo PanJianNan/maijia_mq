@@ -44,16 +44,13 @@ public class ExchangeCenter {
                 if (queueSet != null) {
                     final Object targetMsg = rawMsg;
                     for (final String queue : queueSet) {
-                        Thread thread = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    producer.produce(queue, targetMsg);
-                                } catch (IOException e) {
-                                    logger.error(e.getMessage(), e);
-                                } catch (InterruptedException e) {
-                                    logger.error(e.getMessage(), e);
-                                }
+                        Thread thread = new Thread(() -> {
+                            try {
+                                producer.produce(queue, targetMsg);
+                            } catch (IOException e) {
+                                logger.error(e.getMessage(), e);
+                            } catch (InterruptedException e) {
+                                logger.error(e.getMessage(), e);
                             }
                         });
                         thread.start();
