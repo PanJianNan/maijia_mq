@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -76,27 +78,94 @@ public class NIOFilePublishController {
         }
 
         //1. 获取通道
-        SocketChannel sChannel = SocketChannel.open(new InetSocketAddress(host, ConstantUtils.NIO_MSG_TRANSFER_PORT));
-
+        SocketChannel sChannel = SocketChannel.open();
         //2. 切换非阻塞模式
-        sChannel.configureBlocking(true);
+        sChannel.configureBlocking(false);
+        //3 获取选择器
+        Selector selector = Selector.open();
+        //4 将通道注册到选择器上
+        sChannel.register(selector, SelectionKey.OP_CONNECT);
+        //5. 创建连接
+        sChannel.connect(new InetSocketAddress(host, ConstantUtils.NIO_MSG_TRANSFER_PORT));
 
-        //3. 分配指定大小的缓冲区
+
+        int selectNum;
+//        while ((selectNum = selector.select()) > 0) {
+        while (true) {
+            selectNum = selector.select();
+
+            //此方法执行处于阻塞模式的选择操作
+            System.out.println("selectNum:" + selectNum);
+            if (selectNum <= 0) {
+                break;
+            }
+            Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
+            while (iterator.hasNext()) {
+                SelectionKey sk = iterator.next();
+                SocketChannel socketChannel = (SocketChannel) sk.channel();
+
+                System.out.println("sk isValid:" + sk.isValid());
+
+                if (sk.isConnectable()) {
+                    if (socketChannel.isConnectionPending()) {
+                        socketChannel.finishConnect();//等待连接建立
+                        //6.连接建立后向服务端发送队列名queueName
+                        ByteBuffer buf = ByteBuffer.allocate(1024);
+                        buf.put(queueName.getBytes());
+                        buf.flip();
+                        System.out.println("ops=" + sk.interestOps());
+                        sChannel.register(selector, SelectionKey.OP_READ);//待服务端传回消息触发事件
+//                        sk.interestOps(SelectionKey.OP_READ);
+                        //connect|read后 read之后的下一次selector.select()居然没有阻塞且返回0 ？？？ 但是可以变相的退出wile(true)循环
+                        sk.interestOps(sk.interestOps() | SelectionKey.OP_READ);
+                        socketChannel.write(buf);
+
+                        System.out.println("ops=" + sk.interestOps());
+                    }
+                } else if (sk.isReadable()) {
+                    //7.读取服务端返回的消息内容
+                    ByteBuffer buf = ByteBuffer.allocate(1024);
+                    int readByteNum;
+                    while ((readByteNum = socketChannel.read(buf)) > 0) {//假设消息都小于1024字节，todo 待改善
+                        buf.flip();
+                        byte[] bytes = new byte[readByteNum];
+                        buf.get(bytes, 0, bytes.length);
+                        try (ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
+                            Message msg = (Message) objectInputStream.readObject();
+                            System.out.println(msg);
+                            System.out.println("receive msg:" + msg.getContent());
+                            sk.cancel();
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } /*else if (sk.isWritable()) {
+                    ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+                    byteBuffer.put(queueName.getBytes());
+                    byteBuffer.flip();
+                    int len = socketChannel.write(byteBuffer);
+                    System.out.println(byteBuffer.array());
+                    System.out.println(len);
+                    sk.cancel();
+                }*/
+
+                //8.取消选择键 SelectionKey
+                iterator.remove();
+            }
+        }
+
+        //5. 关闭通道
+        sChannel.close();
+        selector.close();
+
+        System.out.println("@@@ end !!! @@@");
+
+
+
+  /*      //3. 分配指定大小的缓冲区
         ByteBuffer buf = ByteBuffer.allocate(1024);
-
-//        //4. 发送数据给服务端
-//        Scanner scan = new Scanner(System.in);
-//
-//        while(scan.hasNext()){
-//            String str = scan.next();
-//            if ("-1".equals(str)) {
-//                break;
-//            }
-//            buf.put((new Date().toString() + "\n" + str).getBytes());
-//            buf.flip();
-//            sChannel.write(buf);
-//            buf.clear();
-//        }
 
         //4. 发送数据给服务端
         buf.put(queueName.getBytes());
@@ -118,7 +187,7 @@ public class NIOFilePublishController {
         }
 
         //5. 关闭通道
-        sChannel.close();
+        sChannel.close();*/
 
         return "consume success";
     }
