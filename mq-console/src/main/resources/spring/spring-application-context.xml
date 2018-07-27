@@ -13,30 +13,4 @@
 
 	<aop:aspectj-autoproxy proxy-target-class="true" />
 
-	<!--<mvc:default-servlet-handler />-->
-
-	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-		<property name="prefix">
-			<value>/</value>
-		</property>
-		<property name="suffix">
-			<value>.jsp</value>
-		</property>
-	</bean>
-
-	<bean id="fastJsonHttpMessageConverter"
-		  class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
-		<property name="supportedMediaTypes">
-			<list>
-				<value>text/html;charset=UTF-8</value>
-				<value>application/json;charset=UTF-8</value>
-			</list>
-		</property>
-	</bean>
-	<mvc:annotation-driven>
-		<mvc:message-converters>
-			<ref bean="fastJsonHttpMessageConverter" />
-		</mvc:message-converters>
-	</mvc:annotation-driven>
-
 </beans>

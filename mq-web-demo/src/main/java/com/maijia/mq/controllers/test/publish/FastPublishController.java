@@ -9,6 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.net.ConnectException;
@@ -24,6 +26,11 @@ import java.util.*;
 @RestController
 @RequestMapping(value = "test/fast/publish")
 public class FastPublishController {
+
+    @PostConstruct
+    public void init() {
+        System.err.println("@@@ FastPublishController init 完成");
+    }
 
     String queueName = "test.fast.publish1-1";
     String exchangeName = "fast.ex1";

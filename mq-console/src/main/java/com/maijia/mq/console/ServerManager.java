@@ -45,14 +45,14 @@ public class ServerManager {
     }
 
     /**
-     * 初始化Spring容器
+     * 初始化Spring上下文
      */
     private void initSpringContext() {
-        logger.info("初始化Spring容器！");
+        logger.info("初始化Spring上下文！");
         long s = System.currentTimeMillis();
         SpringContext.initSpringContext();//初始化Spring容器
         long e = System.currentTimeMillis();
-        logger.info("初始化Spring容器成功，耗时：" + (e - s) + "ms！");
+        logger.info("初始化Spring上下文成功，耗时：" + (e - s) + "ms！");
     }
 
     /**

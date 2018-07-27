@@ -27,6 +27,12 @@
             <groupId>com.maijia.mq</groupId>
             <artifactId>mq-client</artifactId>
         </dependency>
+
+        <!-- Spring MVC -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
     </dependencies>
 
     <profiles>

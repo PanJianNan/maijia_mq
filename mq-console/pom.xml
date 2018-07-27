@@ -31,6 +31,11 @@
             <artifactId>javax.servlet-api</artifactId>
             <!--<scope>provided</scope>--><!--如果mq-console模块使用web容器启动，需要provided-->
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
     </dependencies>
 
     <profiles>

@@ -22,7 +22,7 @@ public class LimitReadHouseKeepingStrategy extends AbstractHouseKeepingStrategy 
     /**
      * 检查读取数量的间隔
      */
-    private long checkInterval = 10000;
+    private long checkInterval = 10000L;
 
     private CheckReadThread checkThread;
 

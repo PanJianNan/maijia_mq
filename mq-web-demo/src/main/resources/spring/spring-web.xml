@@ -9,9 +9,8 @@
 		http://www.springframework.org/schema/aop  
         http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
 
-	<context:component-scan base-package="com.maijia.mq" />
+	<context:component-scan base-package="com.maijia.mq.controllers" />
 
-	<aop:aspectj-autoproxy proxy-target-class="true" />
 
 	<!--<mvc:default-servlet-handler />-->
 
