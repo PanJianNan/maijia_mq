@@ -16,17 +16,14 @@ public abstract class AbstractMessageAcceptor {
     protected final Logger logger = Logger.getLogger(this.getClass());
 
     protected void fire() {
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    logger.info("init message acceptor");
-                    link();
-                    retryLink();
-                    logger.info("消费异常，断开连接");
-                } catch (IOException e) {
-                    logger.error(e.getMessage(), e);
-                }
+        Thread thread = new Thread(() -> {
+            try {
+                logger.info("init message acceptor");
+                link();
+                retryLink();
+                logger.info("消费异常，断开连接");
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
             }
         });
         thread.start();

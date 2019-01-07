@@ -1,5 +1,5 @@
 /*
-package com.maijia.mq.controllers;
+package com.maijia.mq.webtest.controllers;
 
 import com.maijia.mq.consumer.LevelDBConsumer;
 import com.maijia.mq.producer.LevelDBProducer;

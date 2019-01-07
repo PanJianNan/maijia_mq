@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/' >
+    <!--
+       * 1. 一个appender子元素定义一个日志输出目的地
+       * 2. 一个logger子元素定义一个日志写出器
+    -->
+    <!-- catalina.out -->
+    <appender name="consoleAppender" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                   value="%d [%-5p] [%c{2\}] (%t) {%m}%n" />
+        </layout>
+    </appender>
+
+    <!--文件日志-->
+    <!--<appender name="fileAppender" class="org.apache.log4j.FileAppender">
+        <param name="File" value="${webapp.root}/logs/file.log" />&lt;!&ndash; 设置日志输出文件名 &ndash;&gt;
+        &lt;!&ndash; 设置是否在重新启动服务时，在原有日志的基础添加新日志 &ndash;&gt;
+        <param name="Append" value="false" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%-5p] %d [%c{2\}] (%t) -%-4r {%m}%n" />
+        </layout>
+        &lt;!&ndash;过滤器设置输出的级别&ndash;&gt;
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="levelMin" value="error" />
+            <param name="levelMax" value="error" />
+            <param name="AcceptOnMatch" value="true" />
+        </filter>
+    </appender>-->
+
+    <!--滚动文件，自动记录最新日志-->
+    <!--<appender name="rollingAppender" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="${webapp.root}/logs/rolling.log" />&lt;!&ndash; 设置日志输出文件名 &ndash;&gt;
+        &lt;!&ndash; 设置是否在重新启动服务时，在原有日志的基础添加新日志 &ndash;&gt;
+        <param name="Append" value="true" />
+        &lt;!&ndash;最大长度&ndash;&gt;
+        <param name="MaxFileSize" value="5MB" />
+        &lt;!&ndash;最多备份&ndash;&gt;
+        <param name="MaxBackupIndex" value="10" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%-5p] %d [%c{2\}] (%t) -%-4r {%m}%n" />
+        </layout>
+        &lt;!&ndash;过滤器设置输出的级别&ndash;&gt;
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="levelMin" value="error" />
+            <param name="levelMax" value="error" />
+            <param name="AcceptOnMatch" value="true" />
+        </filter>
+    </appender>-->
+
+    <!--每天产生一个日志文件-->
+<!--    <appender name="dailyAppender" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="File" value="${webapp.root}/logs/daily.log" />
+        <param name="DatePattern" value="'.'yyyy-MM-dd'.log'" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%-5p] %d [%c{2\}] (%t) -%-4r {%m}%n" />
+        </layout>
+        &lt;!&ndash;过滤器设置输出的级别&ndash;&gt;
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="levelMin" value="error" />
+            <param name="levelMax" value="error" />
+            <param name="AcceptOnMatch" value="true" />
+        </filter>
+    </appender>-->
+
+    <!--每天产生一个HTML日志文件,占资源，不建议使用-->
+    <!--<appender name="dailyHtmlAppender" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="File" value="${webapp.root}/logs/daily.html" />
+        <param name="DatePattern" value="'.'yyyy-MM-dd'.html'" />
+        <param name="encoding" value="utf-8"/>
+        <layout class="org.apache.log4j.HTMLLayout">
+        </layout>
+        &lt;!&ndash;过滤器设置输出的级别&ndash;&gt;
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="levelMin" value="error" />
+            <param name="levelMax" value="error" />
+            <param name="AcceptOnMatch" value="true" />
+        </filter>
+    </appender>-->
+
+    <!--
+       logger的作用：
+       1.[name属性]:指定你定义Logger对象时候的name
+       2. additivity : children-logger是否使用 rootLogger的配置,
+          additivity在log4j默认为true。这解释了为什么有些时候，一个日志信息在屏幕上会有多次输出。
+       3.还可以指定level(输出级别)、appender-ref(指定哪个append)
+    -->
+    <!--<logger name="com.yabadun.www.controllers.TestContrller" additivity="true">-->
+    <!--<logger name="com.maijia.mall" additivity="false">
+        &lt;!&ndash; 如果1个包想对应多个 Appender 就这样,对于每个Appender自定义的日志级别可以在Appender上加上filter &ndash;&gt;
+        <appender-ref ref="dailyAppender" />
+    </logger>-->
+    <logger name="com.yabadun.mall" additivity="true">
+        <level value="DEBUG"/>
+    </logger>
+
+    <!--
+        root的作用(相当于全局的意思):
+        1.[priority ]:指定默认的全局输出级别
+        2.[appender-ref ]:指定一些默认的append（没有指出特殊包或者类，即那些没有指定<logger>元素的append）的输出；
+    -->
+    <root>
+        <priority value ="info"/>
+        <!-- 将 logger 中 additivity=true 的日志或者没有指定<logger>的append输出到控制台 -->
+        <appender-ref ref="consoleAppender"/>
+        <!--<appender-ref ref="fileAppender"/>-->
+        <!--<appender-ref ref="rollingAppender"/>-->
+        <!--<appender-ref ref="dailyAppender"/>-->
+    </root>
+</log4j:configuration>

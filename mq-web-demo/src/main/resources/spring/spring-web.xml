@@ -9,7 +9,9 @@
 		http://www.springframework.org/schema/aop  
         http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
 
-	<context:component-scan base-package="com.maijia.mq.controllers" />
+	<context:component-scan base-package="com.maijia.mq.webtest.controllers" />
+
+	<aop:aspectj-autoproxy/><!--<aop:aspectj-autoproxy proxy-target-class="true"/>会强制使用cglib代理-->
 
 
 	<!--<mvc:default-servlet-handler />-->

@@ -115,7 +115,7 @@ public class RpcFramework {
         if (port <= 0 || port > 65535) {
             throw new IllegalArgumentException(String.format("Invalid port %d", port));
         }
-        LOGGER.info(String.format("Get remote service %s from server %s:%i", interfaceClass.getName(), host, port));
+        LOGGER.info(String.format("Get remote service %s from server %s:%d", interfaceClass.getName(), host, port));
         return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class<?>[]{interfaceClass}, (proxy, method, arguments) -> {
             Socket socket = new Socket(host, port);
             try {

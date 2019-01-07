@@ -10,7 +10,7 @@
     </context-param>
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>classpath:spring/spring-application-context.xml</param-value>
+        <param-value>classpath*:/spring/spring-application-context.xml,classpath:spring/spring-datasource.xml</param-value>
     </context-param>
 
     <listener>

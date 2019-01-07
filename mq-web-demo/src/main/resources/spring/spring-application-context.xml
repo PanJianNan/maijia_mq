@@ -10,10 +10,14 @@
 
 	<context:component-scan base-package="com.maijia.mq">
 		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Component"/>
+		<!-- 这里可能是个坑（可能会导致类被重复创建，一个归属于spring的上下文，一个归属于dispatcherServlet）所以要小心配置啊 -->
 	</context:component-scan>
 
+	<context:component-scan base-package="com.maijia.mq.webtest.aspect">
+	</context:component-scan>
 
-	<aop:aspectj-autoproxy proxy-target-class="true" />
+	<aop:aspectj-autoproxy/><!--<aop:aspectj-autoproxy proxy-target-class="true"/>会强制使用cglib代理-->
 
 
 </beans>

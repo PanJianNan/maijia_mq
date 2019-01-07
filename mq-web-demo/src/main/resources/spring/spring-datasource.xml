@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<beans  xmlns="http://www.springframework.org/schema/beans"
+	    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	    xmlns:aop="http://www.springframework.org/schema/aop"
+        xmlns:tx="http://www.springframework.org/schema/tx"
+	    xsi:schemaLocation="http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+			http://www.springframework.org/schema/aop
+			http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+			http://www.springframework.org/schema/tx
+			http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+
+	<!-- Druid过滤器 -->
+	<bean id="stat-filter" class="com.alibaba.druid.filter.stat.StatFilter">
+		<property name="slowSqlMillis" value="3000" />
+		<property name="logSlowSql" value="true" />
+		<property name="mergeSql" value="true" />
+	</bean>
+	<bean id="wall-filter" class="com.alibaba.druid.wall.WallFilter">
+		<property name="dbType" value="mysql" />
+		<property name="logViolation" value="true"/>
+		<property name="throwException" value="false"/>
+	</bean>
+	<bean id="log4j-filter" class="com.alibaba.druid.filter.logging.Log4jFilter">
+		<!--<property name="statementLogEnabled" value="true"/>-->
+		<!--<property name="resultSetLogEnabled" value="true"/>-->
+	</bean>
+
+	<!-- 数据源管理 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		  init-method="init" destroy-method="close" autowire="byName">
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.user}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="driverClassName" value="${jdbc.driverClass}" />
+
+		<!-- 配置最大连接池数量 -->
+		<property name="maxActive" value="${jdbc.maxActive}" />
+		<!-- 初始化时建立物理连接的个数。初始化发生在显示调用init方法，或者第一次getConnection时 -->
+		<property name="initialSize" value="${jdbc.initialSize}" />
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="${jdbc.maxWait}" />
+		<!-- 配置最小连接池数量 -->
+		<property name="minIdle" value="${jdbc.minIdle}"/>
+
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="${jdbc.timeBetweenEvictionRunsMillis}"/>
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="${jdbc.minEvictableIdleTimeMillis}"/>
+
+		<!-- 用来检测连接是否有效的sql，要求是一个查询语句。如果validationQuery为null，testOnBorrow、testOnReturn、testWhileIdle都不会其作用。 -->
+		<property name="validationQuery"><value>SELECT 'x'</value></property>
+		<!--建议配置为true，不影响性能，并且保证安全性。申请连接的时候检测，如果空闲时间大于timeBetweenEvictionRunsMillis，执行validationQuery检测连接是否有效。-->
+		<property name="testWhileIdle"><value>${jdbc.testWhileIdle}</value></property>
+		<!--申请连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能。-->
+		<property name="testOnBorrow"><value>${jdbc.testOnBorrow}</value></property>
+		<!--归还连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能-->
+		<property name="testOnReturn"><value>${jdbc.testOnReturn}</value></property>
+
+		<!-- 打开PSCache，并且指定每个连接上PSCache的大小 -->
+		<property name="poolPreparedStatements"><value>${jdbc.poolPreparedStatements}</value></property>
+		<property name="maxOpenPreparedStatements"><value>${jdbc.maxOpenPreparedStatements}</value></property>
+
+		<!-- 配置监控统计拦截的filters，去掉后监控界面sql无法统计 -->
+		<!--<property name="filters" value="stat,log4j" />-->
+		<property name="proxyFilters">
+			<list>
+				<ref bean="stat-filter" />
+				<ref bean="wall-filter" />
+				<ref bean="log4j-filter" />
+			</list>
+		</property>
+	</bean>
+
+	<!-- 事务相关控制 -->
+	<bean name="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+	<!-- 支持 @Transactional 注解 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<!-- 拦截器方式配置事物 -->
+	<tx:advice id="transactionAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<!-- 增删改 事务管理 -->
+			<tx:method name="add*" propagation="REQUIRED"/>
+			<tx:method name="append*" propagation="REQUIRED"/>
+			<tx:method name="insert*" propagation="REQUIRED"/>
+			<tx:method name="save*" propagation="REQUIRED"/>
+			<tx:method name="update*" propagation="REQUIRED"/>
+			<tx:method name="modify*" propagation="REQUIRED"/>
+			<tx:method name="edit*" propagation="REQUIRED"/>
+			<tx:method name="delete*" propagation="REQUIRED"/>
+			<tx:method name="remove*" propagation="REQUIRED"/>
+			<tx:method name="repair" propagation="REQUIRED"/>
+			<tx:method name="delAndRepair" propagation="REQUIRED"/>
+			<!-- 查询 事务管理 -->
+			<tx:method name="get*" propagation="SUPPORTS" read-only="true"/>
+			<tx:method name="find*" propagation="SUPPORTS" read-only="true"/>
+			<tx:method name="load*" propagation="SUPPORTS" read-only="true"/>
+			<tx:method name="search*" propagation="SUPPORTS" read-only="true"/>
+			<tx:method name="datagrid*" propagation="SUPPORTS" read-only="true"/>
+			<tx:method name="*" propagation="SUPPORTS"/>
+		</tx:attributes>
+	</tx:advice>
+
+    <!-- 定义事物管理AOP切面 -->
+    <aop:config>
+        <aop:pointcut id="transactionPointcut" expression="execution(* com.maijia.mq.webtest.*.*(..)) or execution(* com.maijia.mq.webtest.controllers..*(..))" />
+        <aop:advisor advice-ref="transactionAdvice" pointcut-ref="transactionPointcut" />
+    </aop:config>
+
+	<!-- 配置SqlSessionFactoryBean -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
+		<property name="configLocation" value="classpath:mybatis/mybatis-config.xml"/>
+	</bean>
+
+	<!--创建数据映射器，使用自动扫描包的方式来注册各种映射器 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!--basePackage指定要扫描的包，在此包之下的映射器都会被 搜索到。可指定多个包，包与包之间用逗号或分号分隔 -->
+		<property name="basePackage" value="com.maijia.mq.webtest.dao"/>
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+	</bean>
+</beans>

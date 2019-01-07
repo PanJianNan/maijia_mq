@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<!--mybatis反向生成工具-->
+<generatorConfiguration>
+    <!-- 数据库驱动 -->
+    <classPathEntry location="/Users/panjiannan/Developer/Apache/apache-maven-3.5.0/repository/mysql/mysql-connector-java/5.1.35/mysql-connector-java-5.1.35.jar"/>
+    <context id="inventory" targetRuntime="MyBatis3">
+        <commentGenerator>
+            <!-- 是否去除自动生成时间戳 true：是 ： false:否 -->
+            <property name="suppressDate" value="true"/>
+            <!-- 是否去除自动生成的注释 true：是 ： false:否 -->
+            <property name="suppressAllComments" value="true"/>
+        </commentGenerator>
+        <!-- 数据库链接URL，用户名、密码 -->
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://127.0.0.1:3306/test?useUnicode=true&amp;characterEncoding=utf-8"
+                        userId="root" password="123456">
+        </jdbcConnection>
+        <!-- 是否使用bigDecimal， false可自动转化Long, Integer, Short, etc. -->
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="false"/>
+        </javaTypeResolver>
+        <!-- 生成模型的domain -->
+        <javaModelGenerator targetPackage="com.maijia.mq.webtest.domain" targetProject="src/main/java/">
+            <!-- 是否在当前路径下新加一层schema,eg：fase路径com.oop.eksp.user.model， true:com.oop.eksp.user.model.[schemaName] -->
+            <property name="enableSubPackages" value="true"/>
+            <property name="trimStrings" value="true"/>
+        </javaModelGenerator>
+        <!-- 生成映射文件的mapper.xml -->
+        <sqlMapGenerator targetPackage="mapper" targetProject="src/main/resources/mybatis">
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+        <!-- 生成DAO -->
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.maijia.mq.webtest.dao"
+                             targetProject="src/main/java/">
+            <property name="enableSubPackages" value="true"/>
+        </javaClientGenerator>
+        <!-- 表 -->
+        <table tableName="t_user" domainObjectName="TUser"
+               enableCountByExample="true"
+               enableUpdateByExample="true" enableDeleteByExample="true" enableSelectByExample="true"/>
+    </context>
+</generatorConfiguration> 

@@ -1,4 +1,4 @@
-package com.maijia.mq.controllers.test.publish;
+package com.maijia.mq.webtest.controllers.test.publish;
 
 import com.maijia.mq.client.*;
 import com.maijia.mq.domain.Message;
@@ -10,17 +10,16 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 
 /**
- * FastPublishAcceptor
+ * 测试消息接收器
  *
  * @author panjn
  * @date 2016/12/29
  */
 @Component
-public class FastPublishMsgAcceptor2 extends AbstractMessageAcceptor {
+public class FilePublishMsgAcceptor extends AbstractMessageAcceptor {
 
-    String queueName = "test.fast.publish1-2";
-    String exchangeName = "fast.ex1";
-//    String host = "192.168.102.137";
+    String queueName = "test.file.publish2-1-ceshi";
+    String exchangeName = "file.ex1";
     String host = "127.0.0.1";
 
     @PostConstruct
@@ -34,7 +33,7 @@ public class FastPublishMsgAcceptor2 extends AbstractMessageAcceptor {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(host);
         factory.setPort(3198);
-        factory.setMode(FactoryMode.FAST);
+        factory.setMode(FactoryMode.FILE);
 
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
@@ -46,7 +45,7 @@ public class FastPublishMsgAcceptor2 extends AbstractMessageAcceptor {
         MQConsumer consumer = new DefaultMQConsumer() {
             @Override
             public void handleDelivery(Message message) {
-                System.out.println("[fast1-2] acceptor Received '" + message.getContent() + "'");
+                System.out.println("[file2-1] acceptor Received '" + message.getContent() + "'");
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
