@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.Socket;
 
 /**
@@ -107,7 +108,7 @@ public class Channel implements Serializable {
      *
      * @param consumer
      */
-    public void basicConsume(MQConsumer consumer) {
+    public void basicConsume(MQConsumer consumer) throws ConnectException {
         if (StringUtils.isBlank(queueName)) {
             throw new IllegalArgumentException("please declare target queue's name by method queueDeclare(String queueName) first");
         }
@@ -145,6 +146,8 @@ public class Channel implements Serializable {
 
 //                Thread.sleep(3000);
             }
+        } catch (ConnectException e) {
+            throw e;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         } finally {

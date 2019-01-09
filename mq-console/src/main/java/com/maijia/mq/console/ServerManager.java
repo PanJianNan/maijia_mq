@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 服务器管理类，单例+构造器设计模式，用户安全启动和关闭服务器
+ * 服务器管理类，用户安全启动和关闭服务器
  *
  * @author panjn
  * @date 2017/1/11
@@ -18,10 +18,6 @@ public class ServerManager {
     private static volatile boolean isServerStart = false;
 
     private Map<String, String> param = null;
-    /**
-     * 单例实例
-     */
-    private volatile static ServerManager serverManager = null;
 
     private ServerManager() {
 
@@ -29,19 +25,11 @@ public class ServerManager {
 
     /**
      * 获取服务器管理单例
-     * 懒汉模式改良版（double-check）
      *
      * @return ServerManager
      */
     public static ServerManager getInstance() {
-        if (serverManager == null) {
-            synchronized (ServerManager.class) {
-                if (serverManager == null) {
-                    serverManager = new ServerManager();
-                }
-            }
-        }
-        return serverManager;
+        return ServerManagerSingleton.instance;
     }
 
     /**
@@ -175,5 +163,12 @@ public class ServerManager {
 
     public static boolean isServerStart() {
         return isServerStart;
+    }
+
+    /**
+     * 使用静态内部类实现的[单例模式]
+     */
+    private static class ServerManagerSingleton {
+        private static final ServerManager instance = new ServerManager();
     }
 }

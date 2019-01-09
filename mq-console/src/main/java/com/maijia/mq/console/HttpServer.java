@@ -1,9 +1,5 @@
 package com.maijia.mq.console;
 
-import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
-import java.util.concurrent.Executors;
-
 import com.maijia.mq.console.pipelinefactory.HttpChannelPipelineFactory;
 import org.apache.log4j.Logger;
 import org.jboss.netty.bootstrap.ServerBootstrap;
@@ -17,11 +13,11 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.ChannelGroupFuture;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.HttpVersion;
+import org.jboss.netty.handler.codec.http.*;
+
+import java.net.InetSocketAddress;
+import java.nio.charset.Charset;
+import java.util.concurrent.Executors;
 
 /**
  * Http服务器
@@ -46,7 +42,6 @@ public class HttpServer {
         bootstrap.setPipelineFactory(new HttpChannelPipelineFactory());
 
         //sets an option with specified key and value
-
         bootstrap.setOption("child.tcpNoDelay", Boolean.TRUE);
         bootstrap.setOption("child.keepAlive", Boolean.FALSE);
 

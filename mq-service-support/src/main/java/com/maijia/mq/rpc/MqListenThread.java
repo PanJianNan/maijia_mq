@@ -1,0 +1,131 @@
+package com.maijia.mq.rpc;
+
+import com.maijia.mq.consumer.Consumer;
+import com.maijia.mq.domain.Message;
+import com.maijia.mq.producer.Producer;
+import org.apache.log4j.Logger;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * MqListenThread
+ *
+ * @author panjn
+ * @date 2019/1/9
+ */
+public class MqListenThread extends Thread {
+
+    private final Logger logger = Logger.getLogger(this.getClass());
+
+    private ServerSocket serverSocket;
+
+    private Consumer consumer;
+
+    private Producer producer;
+
+
+    public MqListenThread(Consumer consumer, Producer producer) {
+        this.consumer = consumer;
+        this.producer = producer;
+    }
+
+    public ServerSocket getServerSocket() {
+        return serverSocket;
+    }
+
+    public void setServerSocket(ServerSocket serverSocket) {
+        this.serverSocket = serverSocket;
+    }
+
+    @Override
+    public void run() {
+        if (serverSocket == null) {
+            throw new RuntimeException("serverSocket can't be null");
+        }
+
+        Map<String, Object> failMsgMap = new HashMap<>();
+        ObjectInputStream is = null;
+        ObjectOutputStream os = null;
+        Socket socket = null;
+        try {
+            try {
+                //使用accept()阻塞等待客户端请求，有客户端
+                //请求到来则产生一个Socket对象，并继续执行
+                socket = serverSocket.accept();
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                throw e;
+            }
+
+            //todo 心跳检测在windows中最多值允许17次，超过会发生异常，linux则不会(wtf！,linux也是17次)
+            //2016年12月19日，实测，即使没有心跳检测，发现一旦客户端断开之后，服务端会先尝试Connection reset，重连失败后Socket Closed，占用的端口资源也会释放
+            HeartBeatThread hbt = new HeartBeatThread(socket);
+            hbt.setUncaughtExceptionHandler((t, e) -> {
+                try {
+                    serverSocket.close();
+                } catch (IOException e1) {
+                    logger.error(e1.getMessage(), e1);
+                }
+            });
+            hbt.start();
+
+            //由系统标准输入设备构造BufferedReader对象
+            os = new ObjectOutputStream(socket.getOutputStream());
+            //由Socket对象得到输出流，并构造PrintWriter对象
+            is = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
+
+            while (true) {
+                //接收消费请求 （读）
+                Object recevice = is.readObject();
+//                    System.out.println("收到请求");
+
+                if (recevice instanceof String && !"success".equals(recevice)) {
+                    //返回消息
+                    Message message = consumer.take((String) recevice);
+//                        System.out.println("有货到，马上消费：" + message);
+                    //备份信息以便消费失败时回滚该消息
+                    failMsgMap.put((String) recevice, message);
+
+                    os.writeObject(message);
+                    //向客户端输出该字符串 （写）
+                    os.flush();
+                }
+
+                //确认消费成功 （读）
+                Object ack = is.readObject();
+                if (recevice instanceof String && "success".equals(ack)) {
+                    logger.info("客户端消费成功");
+                    failMsgMap.remove((String) recevice);
+                }
+
+//                    Thread.sleep(3000);
+            }
+
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        } finally {
+            try {
+                for (Map.Entry<String, Object> entry : failMsgMap.entrySet()) {
+                    producer.produce(entry.getKey(), entry.getValue());
+                }
+
+                os.close(); //关闭Socket输出流
+                is.close(); //关闭Socket输入流
+                socket.close(); //关闭Socket
+                serverSocket.close(); //关闭ServerSocket
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+    }
+
+}
