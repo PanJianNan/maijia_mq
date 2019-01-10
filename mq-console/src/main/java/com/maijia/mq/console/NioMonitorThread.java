@@ -73,12 +73,14 @@ public class NioMonitorThread extends Thread {
                         //9. 判断具体是什么事件准备就绪
                         if (sk.isAcceptable()) {
                             //10. 若“接收就绪”，获取客户端连接
+                            //通过ServerSocketChannel的accept创建SocketChannel实例
+                            //完成该操作意味着完成TCP三次握手，TCP物理链路正式建立
                             SocketChannel sChannel = ssChannel.accept();
 
                             //11. 将客户端的Channel切换成非阻塞模式
                             sChannel.configureBlocking(false);
 
-                            //12. 将该通道注册到选择器上
+                            //12. 将该通道注册到选择器上，xuanzeqi jianting qidushijian
                             sChannel.register(selector, SelectionKey.OP_READ);
                         } else if (sk.isReadable()) {
                             //13. 获取当前选择器上“读就绪”状态的通道
