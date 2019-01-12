@@ -14,13 +14,13 @@ public class RpcFrameworkTest {
     //server
     @Test
     public void export() throws Exception {
-        RpcFramework.export(A.class, new B().getClass(), ConnectionFactory.DEFAULT_PORT);
+        RpcFramework.export(A.class, new B().getClass(), ConnectionFactory.DEFAULT_PORT, "1.0.0");
     }
 
     //client
     @Test
     public void refer() throws Exception {
-        A a = RpcFramework.refer(A.class, "127.0.0.1", ConnectionFactory.DEFAULT_PORT);
+        A a = RpcFramework.refer(A.class, "127.0.0.1", ConnectionFactory.DEFAULT_PORT, "1.0.0");
         Assert.isTrue(!a.print(""));
         Assert.isTrue(a.print("hello 大兄弟"));
     }

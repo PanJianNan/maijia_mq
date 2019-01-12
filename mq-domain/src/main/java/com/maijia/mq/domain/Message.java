@@ -41,11 +41,4 @@ public class Message<E> implements Serializable {
         this.content = content;
     }
 
-    public static void main(String[] args) {
-        Object object = null;
-        Message message = (Message) object;
-        System.out.println(message);
-
-
-    }
 }

@@ -4,3 +4,4 @@
 data/
 mq-console/log/
 MaijiaMQ.log*
+.DS_Store

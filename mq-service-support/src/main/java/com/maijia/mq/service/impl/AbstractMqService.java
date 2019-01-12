@@ -58,7 +58,6 @@ public abstract class AbstractMqService {
     }
 
     protected void registerExchange(ExchangeCenter exchangeCenter, String exchangeName, String queueName) {
-        registerExchange(exchangeCenter, exchangeName, queueName);
         if (StringUtils.isBlank(exchangeName)) {
             throw new IllegalArgumentException("exchangeName can't be blank");
         }

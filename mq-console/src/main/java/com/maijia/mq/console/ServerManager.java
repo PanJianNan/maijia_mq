@@ -109,7 +109,8 @@ public class ServerManager {
 
         this.initParams();//初始化业务参数
 
-        this.initNIO();//初始化NIO
+        //改为由InitNioThread被Spring加载后启动
+        //this.initNIO();//初始化NIO
 
         this.printJvmInfo();
         long s1 = System.currentTimeMillis();
@@ -120,12 +121,12 @@ public class ServerManager {
     /**
      * 初始化NIO
      */
-    private void initNIO() {
+    /*private void initNIO() {
         logger.info("init NIO thread!");
         NioMonitorThread thread = new NioMonitorThread();
         thread.setName("NIO monitor thread!");
         thread.start();
-    }
+    }*/
 
     /**
      * 关闭服务器

@@ -137,6 +137,10 @@ public class Channel implements Serializable {
 
                 //获得消息 （读）
                 Object obj = is.readObject();
+                if (obj instanceof Exception) {
+                    logger.error(((Exception) obj).getMessage(), (Exception) obj);
+                    break;
+                }
                 //进行消费
                 consumer.handleDelivery((Message) obj);
 

@@ -25,11 +25,12 @@ public class InitRPC {
 
     @PostConstruct
     public void init() throws Exception {
+        String defaultVersion = "1.0.0";
 //        IFastMqService fastMqService = new FastMqServiceImpl();
-        RpcFramework.export(IFastMqService.class, customBeanFactory.getBean("fastMqServiceImpl"), ConstantUtils.SERVER_PORT);
+        RpcFramework.export(IFastMqService.class, customBeanFactory.getBean("fastMqServiceImpl"), ConstantUtils.SERVER_PORT, defaultVersion);
 //        ICacheMqService cacheMqService = new CacheMqServiceImpl();
-        RpcFramework.export(ICacheMqService.class, customBeanFactory.getBean("cacheMqServiceImpl"), ConstantUtils.SERVER_PORT);
+        RpcFramework.export(ICacheMqService.class, customBeanFactory.getBean("cacheMqServiceImpl"), ConstantUtils.SERVER_PORT, defaultVersion);
 //        FileMqServiceImpl fileMqService = new FileMqServiceImpl();
-        RpcFramework.export(IFileMqService.class, customBeanFactory.getBean("fileMqServiceImpl"), ConstantUtils.SERVER_PORT);
+        RpcFramework.export(IFileMqService.class, customBeanFactory.getBean("fileMqServiceImpl"), ConstantUtils.SERVER_PORT, defaultVersion);
     }
 }

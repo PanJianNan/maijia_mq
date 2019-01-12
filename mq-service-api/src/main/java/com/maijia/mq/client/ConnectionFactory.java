@@ -81,18 +81,19 @@ public class ConnectionFactory {
      * @throws IOException
      */
     public Connection newConnection() throws IOException {
+        String defaultVersion = "1.0.0";
         switch (mode) {
             case FAST:
-                mqService = RpcFramework.refer(IFastMqService.class, host, port);
+                mqService = RpcFramework.refer(IFastMqService.class, host, port, defaultVersion);
                 break;
             case CACHE:
-                mqService = RpcFramework.refer(ICacheMqService.class, host, port);
+                mqService = RpcFramework.refer(ICacheMqService.class, host, port, defaultVersion);
                 break;
             case FILE:
-                mqService = RpcFramework.refer(IFileMqService.class, host, port);
+                mqService = RpcFramework.refer(IFileMqService.class, host, port, defaultVersion);
                 break;
             default:
-                mqService = RpcFramework.refer(IFileMqService.class, host, port);
+                mqService = RpcFramework.refer(IFileMqService.class, host, port, defaultVersion);
                 break;
         }
         return mqService.newConnection(host);

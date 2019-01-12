@@ -1,5 +1,6 @@
 package com.maijia.mq.rpc;
 
+import com.alibaba.fastjson.JSONObject;
 import com.maijia.mq.consumer.Consumer;
 import com.maijia.mq.domain.Message;
 import com.maijia.mq.producer.Producer;
@@ -15,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * MqListenThread
+ * 监听客户端消息请求的线程
  *
  * @author panjn
  * @date 2019/1/9
@@ -66,7 +67,7 @@ public class MqListenThread extends Thread {
 
             //todo 心跳检测在windows中最多值允许17次，超过会发生异常，linux则不会(wtf！,linux也是17次)
             //2016年12月19日，实测，即使没有心跳检测，发现一旦客户端断开之后，服务端会先尝试Connection reset，重连失败后Socket Closed，占用的端口资源也会释放
-            HeartBeatThread hbt = new HeartBeatThread(socket);
+            /*HeartBeatThread hbt = new HeartBeatThread(socket);
             hbt.setUncaughtExceptionHandler((t, e) -> {
                 try {
                     serverSocket.close();
@@ -74,7 +75,7 @@ public class MqListenThread extends Thread {
                     logger.error(e1.getMessage(), e1);
                 }
             });
-            hbt.start();
+            hbt.start();*/
 
             //由系统标准输入设备构造BufferedReader对象
             os = new ObjectOutputStream(socket.getOutputStream());
@@ -82,36 +83,40 @@ public class MqListenThread extends Thread {
             is = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
 
             while (true) {
-                //接收消费请求 （读）
+                //接收消费请求 （1.读）
                 Object recevice = is.readObject();
 //                    System.out.println("收到请求");
 
-                if (recevice instanceof String && !"success".equals(recevice)) {
-                    //返回消息
-                    Message message = consumer.take((String) recevice);
+                if (!(recevice instanceof String)) {
+                    os.writeObject(new IllegalArgumentException("队列名必须是字符串"));
+                    continue;
+                }
+
+                //返回消息
+                Message message = consumer.take((String) recevice);
 //                        System.out.println("有货到，马上消费：" + message);
-                    //备份信息以便消费失败时回滚该消息
-                    failMsgMap.put((String) recevice, message);
+                //备份信息以便消费失败时回滚该消息
+                failMsgMap.put((String) recevice, message);
 
-                    os.writeObject(message);
-                    //向客户端输出该字符串 （写）
-                    os.flush();
-                }
+                os.writeObject(message);
+                //向客户端输出该字符串 （2.写）
+                os.flush();
 
-                //确认消费成功 （读）
+                //确认消费成功 （3.读）
                 Object ack = is.readObject();
-                if (recevice instanceof String && "success".equals(ack)) {
-                    logger.info("客户端消费成功");
-                    failMsgMap.remove((String) recevice);
+                if ("success".equals(ack)) {
+                    logger.info("客户端消费成功 msg:" + JSONObject.toJSONString(message));
+                    failMsgMap.remove(recevice);
                 }
 
-//                    Thread.sleep(3000);
             }
 
         } catch (Exception e) {
+            logger.info("发生异常，可能是客户端断开连接");
             logger.error(e.getMessage(), e);
         } finally {
             try {
+                //todo 暂时将需要重发的消息重新存储起来
                 for (Map.Entry<String, Object> entry : failMsgMap.entrySet()) {
                     producer.produce(entry.getKey(), entry.getValue());
                 }

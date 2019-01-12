@@ -187,7 +187,7 @@ public class LevelDBQueue {
         final AtomicInteger count = this.count;
         final ReentrantLock takeLock = this.takeLock;
         takeLock.lockInterruptibly();
-        System.out.println(adapter.count());
+        logger.info("remain msg count: " + adapter.count());
         try {
             while (count.get() == 0) {
                 notEmpty.await();
