@@ -153,8 +153,7 @@ public class Channel implements Serializable {
             }
         } catch (ConnectException e) {
             throw e;
-
-        } catch (SocketException e) {
+        } catch (SocketException | EOFException e) {
             throw e;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

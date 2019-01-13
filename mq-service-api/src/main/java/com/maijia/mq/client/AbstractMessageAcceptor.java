@@ -27,7 +27,7 @@ public abstract class AbstractMessageAcceptor {
                 logger.error(e.getMessage(), e);
                 try {
                     retryLink();
-                } catch (IOException e1) {
+                } catch (Exception e1) {
                     logger.info("消费由于异常而失败");
                     logger.error(e1.getMessage(), e1);
                 }
@@ -41,8 +41,8 @@ public abstract class AbstractMessageAcceptor {
     protected void retryLink() throws IOException {
         try {
             logger.info("===========尝试重连MJMQ==========");
-            link();
-        } catch (ConnectException e) {
+            link();//todo 之前是通过捕获ConnectionException才尝试重连的,但是SocketException和EOFException也可能需要重连，不过现在可能引起嵌套深度过深导致栈溢出，可以尝试设置一个重试上限次数来解决
+        } catch (IOException e) {
             logger.info("===========重连MJMQ失败，1分钟后重试！==========");
             try {
                 TimeUnit.MINUTES.sleep(1L);
