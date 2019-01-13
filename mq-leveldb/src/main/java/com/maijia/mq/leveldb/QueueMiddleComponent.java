@@ -8,6 +8,7 @@ import org.iq80.leveldb.WriteBatch;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -38,12 +39,12 @@ public class QueueMiddleComponent {
     /**
      * leveldb queue 集合
      */
-    public static final Map<String, LevelDBQueue> QUEUE_MAP = Collections.synchronizedMap(new HashMap<String, LevelDBQueue>());
+    public static final Map<String, LevelDBQueue> QUEUE_MAP = new ConcurrentHashMap();
 
     /**
      * Keep queues' state
      */
-    static final Map<String, Boolean> QUEUES_STATE = Collections.synchronizedMap(new HashMap<String, Boolean>());
+    static final Map<String, Boolean> QUEUES_STATE = new ConcurrentHashMap();
 
     protected volatile LevelDBCursor readCursor;
 

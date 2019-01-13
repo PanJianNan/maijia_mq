@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.net.SocketException;
 
 /**
  * 几乎所有的操作都在channel中进行，channel是进行消息读写的通道。客户端可建立多个channel，每个channel代表一个会话任务。
@@ -108,7 +109,7 @@ public class Channel implements Serializable {
      *
      * @param consumer
      */
-    public void basicConsume(MQConsumer consumer) throws ConnectException {
+    public void basicConsume(MQConsumer consumer) throws IOException {
         if (StringUtils.isBlank(queueName)) {
             throw new IllegalArgumentException("please declare target queue's name by method queueDeclare(String queueName) first");
         }
@@ -152,12 +153,23 @@ public class Channel implements Serializable {
             }
         } catch (ConnectException e) {
             throw e;
+
+        } catch (SocketException e) {
+            throw e;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         } finally {
             try {
                 os.close(); //关闭Socket输出流
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
+            }
+            try {
                 is.close(); //关闭Socket输入流
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
+            }
+            try {
                 socket.close(); //关闭Socket
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);

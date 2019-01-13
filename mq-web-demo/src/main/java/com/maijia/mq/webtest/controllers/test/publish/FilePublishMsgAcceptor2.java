@@ -16,9 +16,9 @@ import java.io.IOException;
  * @date 2016/12/29
  */
 @Component
-public class FilePublishMsgAcceptor extends AbstractMessageAcceptor {
+public class FilePublishMsgAcceptor2 extends AbstractMessageAcceptor {
 
-    String queueName = "test.file.publish1-1";
+    String queueName = "test.file.publish2-1";
     String exchangeName = "file.ex1";
     String host = "127.0.0.1";
 
@@ -46,9 +46,9 @@ public class FilePublishMsgAcceptor extends AbstractMessageAcceptor {
             @Override
             public void handleDelivery(Message message) {
                 if (message == null) {
-                    System.err.println("[file1-1] acceptor Received [null], what fuk");
+                    System.err.println("[file2-1] acceptor Received [null], what fuk");
                 } else {
-                    System.out.println("[file1-1] acceptor Received '" + message.getContent() + "'");
+                    System.out.println("[file2-1] acceptor Received '" + message.getContent() + "'");
                 }
                 try {
                     Thread.sleep(1000);

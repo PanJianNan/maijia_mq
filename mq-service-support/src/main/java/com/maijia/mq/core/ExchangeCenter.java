@@ -43,8 +43,8 @@ public class ExchangeCenter {
                 Set<String> queueSet = exchangeMap.get(exchangeName);
                 if (queueSet != null) {
                     final Object targetMsg = rawMsg;
-                    for (final String queue : queueSet) {
-                        Thread thread = new Thread(() -> {
+                    for (String queue : queueSet) {
+//                        Thread thread = new Thread(() -> {
                             try {
                                 producer.produce(queue, targetMsg);
                             } catch (IOException e) {
@@ -52,8 +52,8 @@ public class ExchangeCenter {
                             } catch (InterruptedException e) {
                                 logger.error(e.getMessage(), e);
                             }
-                        });
-                        thread.start();
+//                        });
+//                        thread.start();
                     }
                 }
                 break;
@@ -64,5 +64,9 @@ public class ExchangeCenter {
                 return producer.produce(queueName, rawMsg);
         }
         return true;
+    }
+
+    private class ProduceThread extends Thread {
+
     }
 }

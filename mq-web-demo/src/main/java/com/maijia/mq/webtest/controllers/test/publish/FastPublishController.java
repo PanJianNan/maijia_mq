@@ -40,7 +40,7 @@ public class FastPublishController {
         System.err.println("FastPublishController构造函数");
     }
 
-    @RequestMapping(value = "produce")
+    @RequestMapping(value = "direct")
     public String produce(final String msg) throws IOException, InterruptedException {
         if (StringUtils.isBlank(msg)) {
             throw new IllegalArgumentException("msg is empty");

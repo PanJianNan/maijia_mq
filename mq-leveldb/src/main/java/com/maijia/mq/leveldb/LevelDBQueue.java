@@ -13,9 +13,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * leveldb 队列
+ *
  * use read cursor and write cursor to offer and transfer data
- * 源于LinkedBlockingQueue,可以再看看ConcurrentLinkedQueue的实现
- * 可以看看，LinkedBlockingDeque（双向阻塞队列）,它支持两端的插入和移出元素
+ * 源于LinkedBlockingQueue。
+ * <p>
+ * 可以看看ConcurrentLinkedQueue的实现，再看看LinkedBlockingDeque（双向阻塞队列），它支持两端的插入和移出元素
  *
  * @author panjn
  * @date 2016/12/12
