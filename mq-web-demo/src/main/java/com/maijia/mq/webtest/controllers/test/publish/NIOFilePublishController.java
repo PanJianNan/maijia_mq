@@ -80,7 +80,7 @@ public class NIOFilePublishController {
 //            throw new RuntimeException("queueName is empty");
         }
 
-        //1.  打开选择器（多路复用器）
+        //1. 打开选择器（多路复用器）
         Selector selector = Selector.open();
         //2. 打开通道
         SocketChannel sChannel = SocketChannel.open();

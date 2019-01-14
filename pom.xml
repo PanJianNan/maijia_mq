@@ -36,6 +36,7 @@
         <version.mockito-core>1.9.5</version.mockito-core>
         <version.leveldbjni>1.8</version.leveldbjni>
         <version.netty>3.6.1.Final</version.netty>
+        <!--<version.netty>4.1.32.Final</version.netty>-->
         <version.servlet-api>4.0.1</version.servlet-api>
         <version.junit>4.0</version.junit>
         <version.spring>4.0.4.RELEASE</version.spring>
@@ -103,6 +104,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty</artifactId>
+                <!--<artifactId>netty-all</artifactId>-->
                 <version>${version.netty}</version>
             </dependency>
 
