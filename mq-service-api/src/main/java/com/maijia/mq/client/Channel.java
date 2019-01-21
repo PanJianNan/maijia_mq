@@ -1,15 +1,22 @@
 package com.maijia.mq.client;
 
-import com.maijia.mq.domain.Message;
+import com.maijia.mq.MjMqProtocolDecoder;
+import com.maijia.mq.MjMqProtocolEncoder;
 import com.maijia.mq.service.IMqService;
 import com.maijia.mq.service.MQConsumer;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
-import java.io.*;
-import java.net.ConnectException;
-import java.net.Socket;
-import java.net.SocketException;
+import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * 几乎所有的操作都在channel中进行，channel是进行消息读写的通道。客户端可建立多个channel，每个channel代表一个会话任务。
@@ -27,6 +34,8 @@ public class Channel implements Serializable {
     private String exchangeName = "default_exchange";
     private ExchangeType exchangeType = ExchangeType.DIRECT;
     private transient IMqService mqService;
+
+    private boolean loopRequest;
 
     public Channel() {
     }
@@ -72,6 +81,14 @@ public class Channel implements Serializable {
         this.mqService = mqService;
     }
 
+    public boolean isLoopRequest() {
+        return loopRequest;
+    }
+
+    public void setLoopRequest(boolean loopRequest) {
+        this.loopRequest = loopRequest;
+    }
+
     /**
      * Publish a message
      *
@@ -107,9 +124,9 @@ public class Channel implements Serializable {
     /**
      * 消费消息，采用ACK确认机制
      *
-     * @param consumer
+     * @param mqConsumer
      */
-    public void basicConsume(MQConsumer consumer) throws IOException {
+    public void basicConsume(MQConsumer mqConsumer) throws IOException, InterruptedException {
         if (StringUtils.isBlank(queueName)) {
             throw new IllegalArgumentException("please declare target queue's name by method queueDeclare(String queueName) first");
         }
@@ -120,60 +137,34 @@ public class Channel implements Serializable {
         //register exchange
         mqService.registerExchange(exchangeName, queueName);
 
-        ObjectInputStream is = null;
-        ObjectOutputStream os = null;
-        Socket socket = null;
+        EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
         try {
-            socket = new Socket(host, port);
-            //由系统标准输入设备构造BufferedReader对象
-            os = new ObjectOutputStream(socket.getOutputStream());
-            //由Socket对象得到输出流，并构造PrintWriter对象
-            is = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
-
-            while (true) {
-                //请求消息 (写)
-                os.writeObject(queueName);
-                os.flush();
-                System.out.println("发起消费请求");
-
-                //获得消息 （读）
-                Object obj = is.readObject();
-                if (obj instanceof Exception) {
-                    logger.error(((Exception) obj).getMessage(), (Exception) obj);
-                    break;
+            Bootstrap bootstrap = new Bootstrap();
+            bootstrap.channel(NioSocketChannel.class);
+            bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
+            bootstrap.group(eventLoopGroup);
+            bootstrap.remoteAddress(host, port);
+            bootstrap.handler(new ChannelInitializer<SocketChannel>() {
+                @Override
+                protected void initChannel(SocketChannel socketChannel) throws Exception {
+                    socketChannel.pipeline().addLast(new MjMqProtocolDecoder(65536, 0, 2));
+                    socketChannel.pipeline().addLast(new MjMqProtocolEncoder());
+                    socketChannel.pipeline().addLast(new MqClientHandler(queueName, mqConsumer, loopRequest));
                 }
-                //进行消费
-                consumer.handleDelivery((Message) obj);
-
-                //确认消费成功 （写）
-                os.writeObject("success");
-                System.out.println("确认消费成功");
-
-//                Thread.sleep(3000);
+            });
+            ChannelFuture future = bootstrap.connect(host, port).sync();
+            if (future.isSuccess()) {
+//                SocketChannel socketChannel = (SocketChannel) future.channel();
+                System.out.println("------connect server success------");
             }
-        } catch (ConnectException e) {
+            future.channel().closeFuture().sync();
+        } catch (InterruptedException e) {
             throw e;
-        } catch (SocketException | EOFException e) {
-            throw e;
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+//            logger.error(e.getMessage(), e);
         } finally {
-            try {
-                os.close(); //关闭Socket输出流
-            } catch (IOException e) {
-                logger.error(e.getMessage(), e);
-            }
-            try {
-                is.close(); //关闭Socket输入流
-            } catch (IOException e) {
-                logger.error(e.getMessage(), e);
-            }
-            try {
-                socket.close(); //关闭Socket
-            } catch (IOException e) {
-                logger.error(e.getMessage(), e);
-            }
+            eventLoopGroup.shutdownGracefully();
         }
+
     }
 
     /**

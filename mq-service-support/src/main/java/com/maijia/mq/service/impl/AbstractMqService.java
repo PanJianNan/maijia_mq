@@ -76,11 +76,11 @@ public abstract class AbstractMqService {
 
     protected boolean produce(Channel channel, Object rawMsg, ExchangeCenter exchangeCenter, Producer producer) throws IOException, InterruptedException {
         if (channel == null) {
-            throw new NullPointerException("channel is NULL");
+            throw new NullPointerException("channel can't be NULL");
         }
 
         if (rawMsg == null) {
-            throw new NullPointerException("message is NULL");
+            throw new NullPointerException("message can't be NULL");
         }
 
         String queueName = channel.getQueueName();

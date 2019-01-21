@@ -5,6 +5,7 @@ import com.maijia.mq.service.ICacheMqService;
 import com.maijia.mq.service.IFastMqService;
 import com.maijia.mq.service.IFileMqService;
 import com.maijia.mq.service.IMqService;
+import com.maijia.mq.util.ConstantUtils;
 
 import java.io.IOException;
 
@@ -29,16 +30,12 @@ public class ConnectionFactory {
      */
     public static final String DEFAULT_HOST = "localhost";
     /**
-     * The default non-ssl port
-     */
-    public static final int DEFAULT_PORT = 3198;
-    /**
      * The default factory mode
      */
     public static final FactoryMode DEFAULT_MODE = FactoryMode.FILE;
 
     private String host = DEFAULT_HOST;
-    private int port = DEFAULT_PORT;
+    private int port = ConstantUtils.NIO_RPC_PORT;
     private FactoryMode mode = DEFAULT_MODE;
     private IMqService mqService;
 
@@ -81,22 +78,32 @@ public class ConnectionFactory {
      * @throws IOException
      */
     public Connection newConnection() throws IOException {
+
+        int mqRequestPort = -1;
         String defaultVersion = "1.0.0";
         switch (mode) {
             case FAST:
                 mqService = RpcFramework.refer(IFastMqService.class, host, port, defaultVersion);
+                mqRequestPort = ConstantUtils.FAST_MQ_LISTEN_PORT;
                 break;
             case CACHE:
                 mqService = RpcFramework.refer(ICacheMqService.class, host, port, defaultVersion);
+                mqRequestPort = ConstantUtils.CACHE_MQ_LISTEN_PORT;
                 break;
             case FILE:
                 mqService = RpcFramework.refer(IFileMqService.class, host, port, defaultVersion);
+                mqRequestPort = ConstantUtils.FILE_MQ_LISTEN_PORT;
                 break;
             default:
+                mqRequestPort = ConstantUtils.FILE_MQ_LISTEN_PORT;
                 mqService = RpcFramework.refer(IFileMqService.class, host, port, defaultVersion);
                 break;
         }
-        return mqService.newConnection(host);
+
+        Connection connection = new Connection();
+        connection.setHost(host);
+        connection.setPort(mqRequestPort);
+        return connection;
     }
 
 }

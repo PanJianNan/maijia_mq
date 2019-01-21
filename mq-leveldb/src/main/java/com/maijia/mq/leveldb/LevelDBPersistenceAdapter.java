@@ -2,11 +2,12 @@ package com.maijia.mq.leveldb;
 
 import com.maijia.mq.domain.Message;
 import com.maijia.mq.leveldb.other.IdWorker;
-import com.maijia.mq.leveldb.other.SerializeUtils;
+import com.maijia.mq.util.HessianSerializeUtils;
 import org.apache.log4j.Logger;
 import org.iq80.leveldb.*;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -59,6 +60,10 @@ public class LevelDBPersistenceAdapter implements Closeable {
 
     public LevelDBPersistenceAdapter() {
         idWorker = new IdWorker(1);
+    }
+
+    @PostConstruct
+    public void init() {
         //初始化leveldb数据存储路径
         // get current dir
         File curPath = new File(System.getProperty("user.dir"));
@@ -159,6 +164,11 @@ public class LevelDBPersistenceAdapter implements Closeable {
         this.batchDeleteSize = batchDeleteSize;
     }
 
+    /**
+     * 创建levedb时的参数设置
+     *
+     * @return
+     */
     protected Options createOptions() {
         Options options = new Options();
         if (null != blockRestartInterval)
@@ -230,7 +240,7 @@ public class LevelDBPersistenceAdapter implements Closeable {
         MessageWrapper wrapper = new MessageWrapper(nextId(), message);
         put(wrapper.getMsgId(), wrapper);
         if (logger.isDebugEnabled()) {
-            logger.debug(new StringBuilder("saved evt:").append(wrapper.getMsgId()));
+            logger.debug(new StringBuilder("saved msg:").append(wrapper.getMsgId()));
         }
         return wrapper.getMsgId();
     }
@@ -268,11 +278,7 @@ public class LevelDBPersistenceAdapter implements Closeable {
      */
     public <T> T get(String key, Class<T> type) throws PersistenceException {
         try {
-            Serializable value = SerializeUtils.unserialize(db.get(key.getBytes()));
-            if (null == value) {
-                return null;
-            }
-            return type.cast(value);
+            return HessianSerializeUtils.deserialize(db.get(key.getBytes()));
         } catch (Exception e) {
             throw new PersistenceException(e);
         }
@@ -291,9 +297,10 @@ public class LevelDBPersistenceAdapter implements Closeable {
         try {
             int index = 0;
             for (; index < batchSize && iterator.hasNext(); iterator.next(), index++) {
-                Serializable value = SerializeUtils.unserialize(iterator
-                        .peekNext().getValue());
-                list.add((MessageWrapper) value);
+                Serializable value = HessianSerializeUtils.deserialize(iterator.peekNext().getValue());
+                if (value instanceof  MessageWrapper) {
+                    list.add((MessageWrapper) value);
+                }
             }
             return list;
         } catch (IOException e) {
@@ -334,7 +341,7 @@ public class LevelDBPersistenceAdapter implements Closeable {
      */
     protected void put(String key, Serializable ser) throws PersistenceException {
         try {
-            db.put(key.getBytes(), SerializeUtils.serialize(ser));
+            db.put(key.getBytes(), HessianSerializeUtils.serialize(ser));
         } catch (Exception e) {
             throw new PersistenceException(e);
         }
@@ -350,7 +357,7 @@ public class LevelDBPersistenceAdapter implements Closeable {
      */
     protected void put(String key, Serializable ser, WriteBatch update) throws PersistenceException {
         try {
-            update.put(key.getBytes(), SerializeUtils.serialize(ser));
+            update.put(key.getBytes(), HessianSerializeUtils.serialize(ser));
         } catch (Exception e) {
             throw new PersistenceException(e);
         }

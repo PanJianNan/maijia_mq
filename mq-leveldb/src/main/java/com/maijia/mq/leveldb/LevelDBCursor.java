@@ -3,20 +3,17 @@ package com.maijia.mq.leveldb;
 import java.io.Serializable;
 
 /**
- * LevelDBCursor
+ * LevelDBCursor 游标
  *
  * @author panjn
  * @date 2016/12/12
  */
-public class LevelDBCursor implements Serializable {
+public class LevelDBCursor implements Serializable, Cloneable {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -348756876229797827L;
-
+    /** 页码 */
     private long pageNo;
-
+    /** 页中的位置 */
     private long index;
 
     public long getPageNo() {
@@ -33,5 +30,15 @@ public class LevelDBCursor implements Serializable {
 
     public void setIndex(long index) {
         this.index = index;
+    }
+
+    @Override
+    protected Object clone() {
+        try {
+            return super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

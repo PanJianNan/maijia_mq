@@ -10,7 +10,7 @@ import com.maijia.mq.domain.Message;
  */
 public interface MQConsumer {
     /**
-     * 自定义消息处理
+     * 自定义消息处理(默认是异步处理)
      *
      * @param message
      */

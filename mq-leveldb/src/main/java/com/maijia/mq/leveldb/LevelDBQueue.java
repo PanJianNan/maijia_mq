@@ -54,9 +54,9 @@ public class LevelDBQueue {
      */
     private final Condition notFull = putLock.newCondition();
 
-    private final QueueMiddleComponent adapter;
-
-    private volatile boolean isOpen = false;
+    private final QueueMiddleComponent queueMiddleComponent;
+    /** whether connect LevelDB */
+    private volatile boolean connect = false;
 
     private final Logger logger = Logger.getLogger(this.getClass());
 
@@ -64,35 +64,54 @@ public class LevelDBQueue {
 
     private final Object locker = new Object();
 
-    public LevelDBQueue(QueueMiddleComponent adapter) {
-        this(adapter, Integer.MAX_VALUE);
+    public LevelDBQueue(QueueMiddleComponent queueMiddleComponent) {
+        this(queueMiddleComponent, Integer.MAX_VALUE);
     }
 
-    public LevelDBQueue(QueueMiddleComponent adapter, int capacity) {
+    public LevelDBQueue(QueueMiddleComponent queueMiddleComponent, int capacity) {
         if (capacity <= 0) {
             throw new IllegalArgumentException();
         }
         this.capacity = capacity;
 
-        this.adapter = adapter;
+        this.queueMiddleComponent = queueMiddleComponent;
     }
 
-    public void open() throws IOException {
-        isOpen = true;
-        this.adapter.open();
-        //init queue count from leveldb
-        count.getAndSet((int) this.adapter.count());
+    /**
+     * 连接LevelDB
+     *
+     * @throws IOException
+     */
+    public void connectLevelDB() throws IOException {
+        fullyLock();
+        try {
+            this.queueMiddleComponent.open();
+            //init queue count from leveldb
+            count.getAndSet((int) this.queueMiddleComponent.count());//todo 如果leveldb数据数量超过int最大值的话就有点蛋疼了
+            connect = true;
+        } finally {
+            fullyUnlock();
+        }
         if (null == houseKeepingStrategy) {
             // default create Limit ReadHouseKeeping
-            houseKeepingStrategy = new LimitReadHouseKeepingStrategy(adapter);
+            houseKeepingStrategy = new LimitReadHouseKeepingStrategy(queueMiddleComponent);
         }
         houseKeepingStrategy.open();
     }
 
+    /**
+     * 断开与LevelDB的连接
+     *
+     * @throws IOException
+     */
     public void close() throws IOException {
-        this.adapter.close();
+        if (!connect) {
+            return;
+        }
+
+        this.queueMiddleComponent.close();
         this.houseKeepingStrategy.close();
-        isOpen = false;
+        connect = false;
         synchronized (this) {
             this.notifyAll();
         }
@@ -106,6 +125,8 @@ public class LevelDBQueue {
      * @throws NullPointerException {@inheritDoc}
      */
     public void put(Message message) throws InterruptedException {
+        checkConnectLevelDB();
+
         if (message == null) {
             throw new NullPointerException();
         }
@@ -127,7 +148,7 @@ public class LevelDBQueue {
             while (count.get() == capacity) {
                 notFull.await();
             }
-            adapter.save(message);
+            queueMiddleComponent.save(message);
             c = count.getAndIncrement();
             if (c + 1 < capacity) {
                 notFull.signal();
@@ -154,6 +175,8 @@ public class LevelDBQueue {
      * @throws NullPointerException if the specified element is null
      */
     public boolean offer(Message message) {
+        checkConnectLevelDB();
+
         if (message == null) {
             throw new NullPointerException();
         }
@@ -166,7 +189,7 @@ public class LevelDBQueue {
         putLock.lock();
         try {
             if (count.get() < capacity) {
-                adapter.save(message);
+                queueMiddleComponent.save(message);
                 c = count.getAndIncrement();
                 if (c + 1 < capacity) {
                     notFull.signal();
@@ -184,17 +207,19 @@ public class LevelDBQueue {
     }
 
     public Message take() throws InterruptedException {
+        checkConnectLevelDB();
+
         Message x = null;
         int c = -1;
         final AtomicInteger count = this.count;
         final ReentrantLock takeLock = this.takeLock;
         takeLock.lockInterruptibly();
-        logger.info("remain msg count: " + adapter.count());
+        logger.info("remain msg count: " + queueMiddleComponent.count());
         try {
             while (count.get() == 0) {
                 notEmpty.await();
             }
-            x = adapter.pop();
+            x = queueMiddleComponent.pop();
             c = count.getAndDecrement();
             if (c > 1) {
                 notEmpty.signal();
@@ -211,6 +236,8 @@ public class LevelDBQueue {
     }
 
     public Message poll(long timeout, TimeUnit unit) throws InterruptedException {
+        checkConnectLevelDB();
+
         Message x = null;
         int c = -1;
         long nanos = unit.toNanos(timeout);
@@ -224,7 +251,7 @@ public class LevelDBQueue {
                 }
                 nanos = notEmpty.awaitNanos(nanos);
             }
-            x = adapter.pop();
+            x = queueMiddleComponent.pop();
             c = count.getAndDecrement();
             if (c > 1)
                 notEmpty.signal();
@@ -240,6 +267,8 @@ public class LevelDBQueue {
     }
 
     public Message poll() {
+        checkConnectLevelDB();
+
         final AtomicInteger count = this.count;
         if (count.get() == 0) {
             return null;
@@ -250,7 +279,7 @@ public class LevelDBQueue {
         takeLock.lock();
         try {
             if (count.get() > 0) {
-                x = adapter.pop();
+                x = queueMiddleComponent.pop();
                 c = count.getAndDecrement();
                 if (c > 1) {
                     notEmpty.signal();
@@ -295,6 +324,31 @@ public class LevelDBQueue {
     }
 
     /**
+     * Locks to prevent both puts and takes.
+     */
+    void fullyLock() {
+        putLock.lock();
+        takeLock.lock();
+    }
+
+    /**
+     * Unlocks to allow both puts and takes.
+     */
+    void fullyUnlock() {
+        takeLock.unlock();
+        putLock.unlock();
+    }
+
+    /**
+     * Returns the number of elements in this queue.
+     *
+     * @return the number of elements in this queue
+     */
+    public int size() {
+        return count.get();
+    }
+
+    /**
      * Inserts the specified element at the tail of this queue, waiting if
      * necessary up to the specified wait time for space to become available.
      *
@@ -304,6 +358,8 @@ public class LevelDBQueue {
      * @throws NullPointerException {@inheritDoc}
      */
     public boolean offer(Message message, long timeout, TimeUnit unit) throws InterruptedException {
+        checkConnectLevelDB();
+
         if (message == null) {
             throw new NullPointerException();
         }
@@ -319,7 +375,7 @@ public class LevelDBQueue {
                 }
                 nanos = notFull.awaitNanos(nanos);
             }
-            adapter.save(message);
+            queueMiddleComponent.save(message);
             c = count.getAndIncrement();
             if (c + 1 < capacity) {
                 notFull.signal();
@@ -340,18 +396,19 @@ public class LevelDBQueue {
     }
 
     public Object transfer(long timeout) {
-        if (!isOpen) {
+        if (!connect) {
             return null;
         }
 
         Object msg = null;
         try {
-            msg = adapter.pop();
+            msg = queueMiddleComponent.pop();
         } catch (PersistenceException e) {
             logger.error("pop message error", e);
         }
-        if (msg != null)
+        if (msg != null) {
             return msg;
+        }
 
         final Object locker = this.locker;
         synchronized (locker) {
@@ -370,11 +427,12 @@ public class LevelDBQueue {
             return transfer(timeout);
         }
 
-        if (!isOpen)
+        if (!connect) {
             return null;
+        }
 
         try {
-            msg = adapter.pop();
+            msg = queueMiddleComponent.pop();
         } catch (PersistenceException e) {
             logger.error("pop message error", e);
         }
@@ -382,12 +440,41 @@ public class LevelDBQueue {
         return msg;
     }
 
-    public int enqueueSize() {
-        return 0;
+    /**
+     * Returns <tt>true</tt> if this collection contains no elements.
+     *
+     * @return <tt>true</tt> if this collection contains no elements
+     */
+    public boolean isEmpty() {
+        return size() == 0;
     }
 
-    public boolean isEmpty() {
-        return false;
+    /**
+     * Atomically removes all of the elements from this queue in LevelDB.
+     * The queue will be empty after this call returns.
+     */
+    public void clear() {
+        fullyLock();
+        try {
+            queueMiddleComponent.clear();
+            // assert head.item == null && head.next == null;
+            if (count.getAndSet(0) == capacity) {
+                notFull.signal();
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        } finally {
+            fullyUnlock();
+        }
+    }
+
+    /**
+     * LevelDBQueue是否成功连接LevelDB的检查
+     */
+    public void checkConnectLevelDB() {
+        if (!connect) {
+            throw new RuntimeException("Please connect LevelDB before use LevelDBQueue");
+        }
     }
 
     public IHouseKeepingStrategy getHouseKeepingStrategy() {

@@ -4,6 +4,7 @@ import com.maijia.mq.client.*;
 import com.maijia.mq.domain.Message;
 import com.maijia.mq.service.MQConsumer;
 import com.maijia.mq.service.impl.DefaultMQConsumer;
+import com.maijia.mq.util.ConstantUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -28,11 +29,11 @@ public class FilePublishMsgAcceptor2 extends AbstractMessageAcceptor {
     }
 
     @Override
-    protected void link() throws IOException {
+    protected void link() throws IOException, InterruptedException {
         // 创建连接工厂
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(host);
-        factory.setPort(3198);
+        factory.setPort(ConstantUtils.NIO_RPC_PORT);
         factory.setMode(FactoryMode.FILE);
 
         Connection connection = factory.newConnection();

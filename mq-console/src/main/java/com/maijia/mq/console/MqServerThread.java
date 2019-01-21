@@ -1,5 +1,9 @@
 package com.maijia.mq.console;
 
+import com.maijia.mq.MjMqProtocolDecoder;
+import com.maijia.mq.MjMqProtocolEncoder;
+import com.maijia.mq.consumer.Consumer;
+import com.maijia.mq.producer.Producer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -8,26 +12,23 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
-import io.netty.handler.stream.ChunkedWriteHandler;
 import org.apache.log4j.Logger;
 
 /**
- * 简易HTTP服务
- *
- * @author panjn
- * @date 2019/1/15
+ * https://blog.csdn.net/wocjy/article/details/78661464
  */
-public class HttpServer implements Runnable {
+public class MqServerThread implements Runnable {
 
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private static final Logger LOGGER = Logger.getLogger(MqServerThread.class);
 
     private int port;
+    private Consumer consumer;
+    private Producer producer;
 
-    public HttpServer(int port) {
+    public MqServerThread(int port, Consumer consumer, Producer producer) {
         this.port = port;
+        this.consumer = consumer;
+        this.producer = producer;
     }
 
     @Override
@@ -51,26 +52,9 @@ public class HttpServer implements Runnable {
                     //用于向你的Channel当中添加ChannelInboundHandler的实现
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         public void initChannel(SocketChannel ch) throws Exception {
-//                            ch.pipeline().addLast(new EchoServerHandler());
-//
-//                            // server端发送的是httpResponse，所以要使用HttpResponseEncoder进行编码
-//                            ch.pipeline().addLast(new HttpResponseEncoder());
-//                            // server端接收到的是httpRequest，所以要使用HttpRequestDecoder进行解码
-//                            ch.pipeline().addLast(new HttpRequestDecoder());
-//                            ch.pipeline().addLast(new HttpServerHandler());
-//                            //增加自定义实现的Handler
-//                            ch.pipeline().addLast(new HttpServerCodec());
-
-                            // server端接收到的是httpRequest，所以要使用HttpRequestDecoder进行解码
-                            ch.pipeline().addLast("http-decoder",new HttpRequestDecoder());
-                            //将多个消息转换为单一的FullHttpRequest或FullHttpResponse对象
-                            ch.pipeline().addLast("http-aggregator",new HttpObjectAggregator(65535));
-                            // server端发送的是httpResponse，所以要使用HttpResponseEncoder进行编码
-                            ch.pipeline().addLast("http-encoder",new HttpResponseEncoder());
-                            //解决大数据包传输问题，用于支持异步写大量数据流并且不需要消耗大量内存也不会导致内存溢出错误( OutOfMemoryError )。
-                            //仅支持ChunkedInput类型的消息。也就是说，仅当消息类型是ChunkedInput时才能实现ChunkedWriteHandler提供的大数据包传输功能
-                            ch.pipeline().addLast("http-chunked",new ChunkedWriteHandler());//解决大码流的问题
-                            ch.pipeline().addLast("http-server",new HttpServerHandler());
+                            ch.pipeline().addLast(new MjMqProtocolDecoder(65536, 0, 2));
+                            ch.pipeline().addLast(new MjMqProtocolEncoder());
+                            ch.pipeline().addLast(new MqServerHandler(consumer, producer));
                         }
 
                     })
@@ -82,6 +66,7 @@ public class HttpServer implements Runnable {
                     //是否启用心跳保活机制。在双方TCP套接字建立连接后（即都进入ESTABLISHED状态）并且在两个小时左右上层没有任何数据传输的情况下，这套机制才会被激活。
                     //childOption是用来给父级ServerChannel之下的Channels设置参数的
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
+//                    .childOption(ChannelOption.AUTO_READ, true);//设为false的话，客户端连接异常关闭，服务端会感知不到，造成大量CLOSE_WAIT现象
 
             // 绑定并开始接受传入的连接。
             ChannelFuture f = b.bind(port).sync();
@@ -93,7 +78,7 @@ public class HttpServer implements Runnable {
             //closeFuture()当Channel关闭时返回一个ChannelFuture,用于链路检测
             f.channel().closeFuture().sync();
         } catch (InterruptedException e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         } finally {
             //资源优雅释放
             bossGroup.shutdownGracefully();
@@ -101,13 +86,4 @@ public class HttpServer implements Runnable {
         }
     }
 
-
-    public static void main(String[] args) {
-        int port = 10241;
-        try {
-            new HttpServer(port).run();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

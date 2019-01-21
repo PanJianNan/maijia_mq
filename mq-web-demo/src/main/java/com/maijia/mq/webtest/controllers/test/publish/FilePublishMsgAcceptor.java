@@ -4,6 +4,7 @@ import com.maijia.mq.client.*;
 import com.maijia.mq.domain.Message;
 import com.maijia.mq.service.MQConsumer;
 import com.maijia.mq.service.impl.DefaultMQConsumer;
+import com.maijia.mq.util.ConstantUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -28,11 +29,11 @@ public class FilePublishMsgAcceptor extends AbstractMessageAcceptor {
     }
 
     @Override
-    protected void link() throws IOException {
+    protected void link() throws IOException, InterruptedException {
         // 创建连接工厂
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(host);
-        factory.setPort(3198);
+        factory.setPort(ConstantUtils.NIO_RPC_PORT);
         factory.setMode(FactoryMode.FILE);
 
         Connection connection = factory.newConnection();
@@ -40,9 +41,10 @@ public class FilePublishMsgAcceptor extends AbstractMessageAcceptor {
         channel.queueDeclare(queueName);//注册需要消息队列名
         channel.setMqService(factory.getMqService());//尴尬
         channel.exchangeDeclare(exchangeName);
+        channel.setLoopRequest(true);
 
         //DefaultConsumer类实现了Consumer接口，通过传入一个频道，告诉服务器我们需要那个频道的消息，如果频道中有消息，就会执行回调函数handleDelivery
-        MQConsumer consumer = new DefaultMQConsumer() {
+        MQConsumer mqConsumer = new DefaultMQConsumer() {
             @Override
             public void handleDelivery(Message message) {
                 if (message == null) {
@@ -59,7 +61,7 @@ public class FilePublishMsgAcceptor extends AbstractMessageAcceptor {
         };
 
         //自动回复队列应答 -- 消息确认机制
-        channel.basicConsume(consumer);
+        channel.basicConsume(mqConsumer);
     }
 
 }

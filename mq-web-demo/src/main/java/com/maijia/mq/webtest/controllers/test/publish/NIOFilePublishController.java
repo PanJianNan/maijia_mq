@@ -56,7 +56,7 @@ public class NIOFilePublishController {
                     Map<String, Object> map = new HashMap<>();
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     map.put("msg", msg);
-                    map.put("time", simpleDateFormat.format(new Date()) + "_direct_nio");
+                    map.put("time", simpleDateFormat.format(new Date()) + " | direct_nio");
                     try {
                         channel.basicPublish(map);
                     } catch (IOException e) {

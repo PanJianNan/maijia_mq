@@ -43,15 +43,21 @@ public class LevelDBConsumer implements Consumer {
      */
     private LevelDBQueue getLevelDBQueue(String queueName) throws IOException {
         LevelDBQueue levelDBQueue = QueueMiddleComponent.QUEUE_MAP.get(queueName);
+
         if (levelDBQueue == null) {
-            //初始化
-            QueueMiddleComponent queueMiddleComponent = new QueueMiddleComponent(adapter, queueName);
-            levelDBQueue = new LevelDBQueue(queueMiddleComponent);
-            LimitReadHouseKeepingStrategy strategy = new LimitReadHouseKeepingStrategy(queueMiddleComponent);
-            strategy.setCheckInterval(1000);
-            levelDBQueue.setHouseKeepingStrategy(strategy);
-            levelDBQueue.open();
-            QueueMiddleComponent.QUEUE_MAP.put(queueName, levelDBQueue);
+            synchronized (this) {
+                levelDBQueue = QueueMiddleComponent.QUEUE_MAP.get(queueName);
+                if (levelDBQueue == null) {
+                    //初始化
+                    QueueMiddleComponent queueMiddleComponent = new QueueMiddleComponent(adapter, queueName);
+                    levelDBQueue = new LevelDBQueue(queueMiddleComponent);
+                    LimitReadHouseKeepingStrategy strategy = new LimitReadHouseKeepingStrategy(queueMiddleComponent);
+//                    strategy.setCheckInterval(60 * 1000L);
+                    levelDBQueue.setHouseKeepingStrategy(strategy);
+                    levelDBQueue.connectLevelDB();
+                    QueueMiddleComponent.QUEUE_MAP.put(queueName, levelDBQueue);
+                }
+            }
         }
         return levelDBQueue;
     }

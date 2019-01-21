@@ -5,7 +5,6 @@ import com.maijia.mq.rpc.RpcFramework;
 import com.maijia.mq.service.ICacheMqService;
 import com.maijia.mq.service.IFastMqService;
 import com.maijia.mq.service.IFileMqService;
-import com.maijia.mq.util.ConstantUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -25,12 +24,11 @@ public class InitRPC {
 
     @PostConstruct
     public void init() throws Exception {
-        String defaultVersion = "1.0.0";
 //        IFastMqService fastMqService = new FastMqServiceImpl();
-        RpcFramework.export(IFastMqService.class, customBeanFactory.getBean("fastMqServiceImpl"), ConstantUtils.SERVER_PORT, defaultVersion);
+        RpcFramework.export(IFastMqService.class, customBeanFactory.getBean("fastMqServiceImpl"), RpcFramework.DEFAULT_VERSION);
 //        ICacheMqService cacheMqService = new CacheMqServiceImpl();
-        RpcFramework.export(ICacheMqService.class, customBeanFactory.getBean("cacheMqServiceImpl"), ConstantUtils.SERVER_PORT, defaultVersion);
+        RpcFramework.export(ICacheMqService.class, customBeanFactory.getBean("cacheMqServiceImpl"), RpcFramework.DEFAULT_VERSION);
 //        FileMqServiceImpl fileMqService = new FileMqServiceImpl();
-        RpcFramework.export(IFileMqService.class, customBeanFactory.getBean("fileMqServiceImpl"), ConstantUtils.SERVER_PORT, defaultVersion);
+        RpcFramework.export(IFileMqService.class, customBeanFactory.getBean("fileMqServiceImpl"), RpcFramework.DEFAULT_VERSION);
     }
 }

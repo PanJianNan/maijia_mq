@@ -1,5 +1,7 @@
 package com.maijia.mq.console;
 
+import org.apache.log4j.Logger;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,34 +10,23 @@ import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * 工具类
  *
- * @author cjx
+ * @author panjn
+ * @date 2017/1/11
  */
 public class Util {
 
     /**
      * 日志
      */
-    private static final Log logger = LogFactory.getLog(Util.class);
+    private static final Logger LOGGER = Logger.getLogger(Util.class);
 
     /**
      * 获取绝对路径(项目路径中不可以有空格)
@@ -270,7 +261,7 @@ public class Util {
                 try {
                     map.put(AESUtil.decryptStr(key), AESUtil.decryptStr(value));
                 } catch (Exception e) {
-                    logger.info(e.getMessage());
+                    LOGGER.info(e.getMessage());
                 }
             } else {
                 map.put(key, value);

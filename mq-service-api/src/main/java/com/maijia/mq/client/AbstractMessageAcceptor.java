@@ -3,7 +3,6 @@ package com.maijia.mq.client;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -22,7 +21,7 @@ public abstract class AbstractMessageAcceptor {
             try {
                 logger.info("init message acceptor");
                 link();
-            } catch (IOException e) {
+            } catch (IOException | InterruptedException e) {
                 logger.info("消费异常，断开连接");
                 logger.error(e.getMessage(), e);
                 try {
@@ -36,13 +35,13 @@ public abstract class AbstractMessageAcceptor {
         thread.start();
     }
 
-    protected abstract void link() throws IOException;
+    protected abstract void link() throws IOException, InterruptedException;
 
     protected void retryLink() throws IOException {
         try {
             logger.info("===========尝试重连MJMQ==========");
             link();//todo 之前是通过捕获ConnectionException才尝试重连的,但是SocketException和EOFException也可能需要重连，不过现在可能引起嵌套深度过深导致栈溢出，可以尝试设置一个重试上限次数来解决
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             logger.info("===========重连MJMQ失败，1分钟后重试！==========");
             try {
                 TimeUnit.MINUTES.sleep(1L);

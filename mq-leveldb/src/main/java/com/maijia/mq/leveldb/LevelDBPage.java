@@ -11,13 +11,10 @@ import java.util.List;
  */
 public class LevelDBPage implements Serializable {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -3661168670876518992L;
-
+    /** 页码 */
     private long no;
-
+    /** 消息id(索引) */
     private List<String> indexes;
 
     public long getNo() {

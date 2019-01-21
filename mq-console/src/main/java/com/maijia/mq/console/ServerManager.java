@@ -1,5 +1,12 @@
 package com.maijia.mq.console;
 
+import com.maijia.mq.consumer.DefaultConsumer;
+import com.maijia.mq.consumer.LevelDBConsumer;
+import com.maijia.mq.consumer.RedisConsumer;
+import com.maijia.mq.producer.DefaultProducer;
+import com.maijia.mq.producer.LevelDBProducer;
+import com.maijia.mq.producer.RedisProducer;
+import com.maijia.mq.util.ConstantUtils;
 import org.apache.log4j.Logger;
 
 import java.util.HashMap;
@@ -15,7 +22,7 @@ public class ServerManager {
 
     private final Logger logger = Logger.getLogger(this.getClass());
 
-    private static volatile boolean isServerStart = false;
+    private static volatile boolean serverStart = false;
 
     private Map<String, String> param = null;
 
@@ -49,8 +56,9 @@ public class ServerManager {
     private void initHttpServer(int port) {
         logger.info("启动netty服务器！");
         long s = System.currentTimeMillis();
-        //端口号在核心模块配置
-        HttpServer.init(port);
+        //端口号在核心模块配置,todo 暂时写死10241
+        Thread httpServerThread = new Thread(new HttpServer(10241), "httpServerThread");
+        httpServerThread.start();
         long e = System.currentTimeMillis();
         logger.info("启动netty服务器成功，耗时：" + (e - s) + "ms！");
     }
@@ -59,8 +67,7 @@ public class ServerManager {
      * 初始化线程池或线程
      */
     private void initThreadPool() {
-        ThreadHolder.init();//框架线程池
-        //AsynThreadHolder.init();//业务线程池
+//        ThreadHolder.init();//框架线程池
     }
 
     /**
@@ -89,7 +96,7 @@ public class ServerManager {
      * 关闭netty服务器
      */
     public void shutDownNetty() {
-        HttpServer.bootstrap.shutdown();
+//        HttpServer.bootstrap.shutdown();
     }
 
     /**
@@ -105,18 +112,29 @@ public class ServerManager {
 
         this.initSpringContext();//初始化spring容器
         this.initHttpServer(Util.getIntOfObj(param.get("port")));//初始化netty服务器
-        this.initThreadPool();//初始化线程池
 
         this.initParams();//初始化业务参数
 
         //改为由InitNioThread被Spring加载后启动
         //this.initNIO();//初始化NIO
 
+        //初始化netty nio线程，用于处理客户端消息请求
+        //this.initMqListenThread();//(同样改为交由Spring初始化)
+
+        //this.initThreadPool();//初始化线程池
+
         this.printJvmInfo();
         long s1 = System.currentTimeMillis();
         logger.info("服务器启动成功，耗时：" + (s1 - s0) + "毫秒！");
-        isServerStart = true;
+        serverStart = true;
     }
+
+    /**
+     * 初始化netty nio线程，用于处理客户端消息请求
+     */
+    /*private void initMqListenThread() {
+
+    }*/
 
     /**
      * 初始化NIO
@@ -163,7 +181,7 @@ public class ServerManager {
     }
 
     public static boolean isServerStart() {
-        return isServerStart;
+        return serverStart;
     }
 
     /**

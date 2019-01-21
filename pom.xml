@@ -5,14 +5,14 @@
     <!--<parent>-->
         <!--<groupId>com.maijia</groupId>-->
         <!--<artifactId>maijia-parent</artifactId>-->
-        <!--<version>1.0.0-SNAPSHOT</version>-->
+        <!--<version>2.0.0-SNAPSHOT</version>-->
     <!--</parent>-->
 
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.maijia.mq</groupId>
     <artifactId>mq-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <modules>
         <module>mq-service-api</module>
         <module>mq-service-support</module>
@@ -35,8 +35,7 @@
         <version.hamcrest-core>1.3</version.hamcrest-core>
         <version.mockito-core>1.9.5</version.mockito-core>
         <version.leveldbjni>1.8</version.leveldbjni>
-        <version.netty>3.6.1.Final</version.netty>
-        <!--<version.netty>4.1.32.Final</version.netty>-->
+        <version.netty>4.1.32.Final</version.netty>
         <version.servlet-api>4.0.1</version.servlet-api>
         <version.junit>4.0</version.junit>
         <version.spring>4.0.4.RELEASE</version.spring>
@@ -47,6 +46,7 @@
         <version.log4j>1.2.9</version.log4j>
         <version.spring-data-redis>1.6.0.RELEASE</version.spring-data-redis>
         <version.jedis>2.7.3</version.jedis>
+        <version.sofa-hessian>4.0.1</version.sofa-hessian>
     </properties>
 
     <dependencyManagement>
@@ -54,47 +54,47 @@
             <dependency>
                 <groupId>com.maijia.mq</groupId>
                 <artifactId>mq-domain</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>2.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.maijia.mq</groupId>
                 <artifactId>mq-service-api</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>2.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.maijia.mq</groupId>
                 <artifactId>mq-service-support</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>2.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.maijia.mq</groupId>
                 <artifactId>mq-cache-api</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>2.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.maijia.mq</groupId>
                 <artifactId>mq-cache-redis</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>2.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.maijia.mq</groupId>
                 <artifactId>mq-util</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>2.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.maijia.mq</groupId>
                 <artifactId>mq-leveldb</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>2.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.maijia.mq</groupId>
                 <artifactId>mq-console</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>2.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.maijia.mq</groupId>
                 <artifactId>mq-client</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>2.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.fusesource.leveldbjni</groupId>
@@ -103,11 +103,9 @@
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
-                <artifactId>netty</artifactId>
-                <!--<artifactId>netty-all</artifactId>-->
+                <artifactId>netty-all</artifactId>
                 <version>${version.netty}</version>
             </dependency>
-
 
             <dependency>
                 <groupId>javax.servlet</groupId>
@@ -195,6 +193,11 @@
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
                 <version>${version.log4j}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>hessian</artifactId>
+                <version>${version.sofa-hessian}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

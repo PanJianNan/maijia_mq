@@ -7,13 +7,17 @@ import org.iq80.leveldb.WriteBatch;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * use read cursor and write cursor to store and read data, and create scheduling house-keeping to clear invalidate data
+ * <p>
+ * LevelDBQueue与LevelDBPersistenceAdapter的中间件
  *
  * @author panjn
  * @date 2016/12/12
@@ -28,13 +32,15 @@ public class QueueMiddleComponent {
 
     static final String KEY_PAGE = "p";
 
-    static final String KEY_REAR_PAGE_NO = "rpn";
+    static final String KEY_CURRENT_PAGE_NO = "cpn";
 
     static final String KEY_HEAD_PAGE_NO = "hpn";
 
+    static final String KEY_LAST_DEL_PAGE_NO = "ldpn";
+
     static final String SEPERATOR = "_";
 
-    static final int DEFAULT_PAGE_SIZE = 100;
+    static final int DEFAULT_PAGE_SIZE = 1000;
 
     /**
      * leveldb queue 集合
@@ -45,29 +51,47 @@ public class QueueMiddleComponent {
      * Keep queues' state
      */
     static final Map<String, Boolean> QUEUES_STATE = new ConcurrentHashMap();
-
-    protected volatile LevelDBCursor readCursor;
-
-    protected volatile LevelDBCursor writeCursor;
-
     /**
+     * 读游标
+     */
+    protected volatile LevelDBCursor readCursor;
+    /**
+     * 写游标
+     */
+    protected volatile LevelDBCursor writeCursor;
+    /**
+     * 删除位置的游标
+     * <p>
      * pop a message wouldn't really delete a data, it just move deleteCursor, data would be deleted by house keeping
      */
     protected volatile LevelDBCursor deleteCursor;
-
+    /**
+     * 当前页，即写游标所在的页
+     */
     protected volatile LevelDBPage currentPage;
-
-    protected volatile Long rearPageNo;
-
+    /**
+     * 当前页页码，即写游标所在页的页码
+     */
+    protected volatile Long currentPageNo;
+    /**
+     * 拥有有效消息的首页页码
+     */
     protected volatile Long headPageNo;
 
     /**
+     * 上一次被删除的无效页页码
+     */
+    protected volatile Long lastDelPageNo;
+
+    /**
      * when operating read , it need to lock
+     * //锁被我外移至LevelDBQueue
      */
     protected final ReentrantLock readLock = new ReentrantLock();
 
     /**
      * when operating write, it need to lock
+     * //锁被我外移至LevelDBQueue
      */
     protected ReentrantLock writeLock = new ReentrantLock();
 
@@ -84,7 +108,9 @@ public class QueueMiddleComponent {
     protected final Logger logger = Logger.getLogger(this.getClass());
 
     protected final LevelDBPersistenceAdapter adapter;
-
+    /**
+     * 队列名
+     */
     protected final String queueName;
 
     /**
@@ -112,6 +138,7 @@ public class QueueMiddleComponent {
     public synchronized void open() throws IOException {
         adapter.open();
         try {
+            //将队列设置为可用状态
             QueueMiddleComponent.QUEUES_STATE.put(queueName, true);
             load();
         } catch (PersistenceException e) {
@@ -142,20 +169,23 @@ public class QueueMiddleComponent {
 
     /**
      * Load page info, read,write and delete cursor
+     * <p>
+     * 加载该队列对应的读、写、删除的游标数据
      *
      * @throws PersistenceException
      */
     public void load() throws PersistenceException {
-        final Lock readLock = this.readLock;
-        final Lock writeLock = this.writeLock;
-        readLock.lock();
-        writeLock.lock();
+        //锁被我外移至LevelDBQueue
+//        final Lock readLock = this.readLock;
+//        final Lock writeLock = this.writeLock;
+//        readLock.lock();
+//        writeLock.lock();
         try {
             loadPage();
             loadCursor();
         } finally {
-            readLock.unlock();
-            writeLock.unlock();
+//            readLock.unlock();
+//            writeLock.unlock();
         }
     }
 
@@ -214,24 +244,32 @@ public class QueueMiddleComponent {
      * @throws PersistenceException
      */
     protected void loadPage() throws PersistenceException {
-        rearPageNo = get(KEY_REAR_PAGE_NO, Long.class);
-        if (null == rearPageNo) {
-            rearPageNo = 0L;
-            put(KEY_REAR_PAGE_NO, rearPageNo);
+        currentPageNo = get(KEY_CURRENT_PAGE_NO, Long.class);
+        if (currentPageNo == null) {
+            currentPageNo = 0L;
+            put(KEY_CURRENT_PAGE_NO, currentPageNo);
         }
+
+        currentPage = get(buildKey(KEY_PAGE, String.valueOf(currentPageNo)), LevelDBPage.class);
+        if (currentPage == null) {
+            currentPage = new LevelDBPage();
+            currentPage.setNo(currentPageNo);
+            currentPage.setIndexes(new ArrayList<>(pageSize));
+            put(buildKey(KEY_PAGE, String.valueOf(currentPageNo)), currentPage);
+        }
+
         headPageNo = get(KEY_HEAD_PAGE_NO, Long.class);
-        if (null == headPageNo) {
+        if (headPageNo == null) {
             headPageNo = 0L;
             put(KEY_HEAD_PAGE_NO, headPageNo);
         }
 
-        currentPage = get(buildKey(KEY_PAGE, String.valueOf(rearPageNo)), LevelDBPage.class);
-        if (null == currentPage) {
-            currentPage = new LevelDBPage();
-            currentPage.setNo(rearPageNo);
-            currentPage.setIndexes(new ArrayList<String>(pageSize));
-            put(buildKey(KEY_PAGE, String.valueOf(rearPageNo)), currentPage);
+        lastDelPageNo = get(KEY_LAST_DEL_PAGE_NO, Long.class);
+        if (lastDelPageNo == null) {
+            lastDelPageNo = -1L;
+            put(KEY_HEAD_PAGE_NO, lastDelPageNo);
         }
+
     }
 
     /**
@@ -241,28 +279,28 @@ public class QueueMiddleComponent {
      */
     protected void loadCursor() throws PersistenceException {
         readCursor = get(KEY_READ_CURSOR, LevelDBCursor.class);
-        if (null == readCursor) {
-            readCursor = new LevelDBCursor();
-            readCursor.setPageNo(headPageNo);
-            readCursor.setIndex(0);
-            put(KEY_READ_CURSOR, readCursor);
+        if (readCursor == null) {
+            readCursor = createDefaultCursor(KEY_READ_CURSOR, headPageNo);
         }
 
         writeCursor = get(KEY_WRITE_CURSOR, LevelDBCursor.class);
-        if (null == writeCursor) {
-            writeCursor = new LevelDBCursor();
-            writeCursor.setPageNo(rearPageNo);
-            writeCursor.setIndex(0);
-            put(KEY_WRITE_CURSOR, writeCursor);
+        if (writeCursor == null) {
+            writeCursor = createDefaultCursor(KEY_WRITE_CURSOR, currentPageNo);
         }
 
         deleteCursor = get(KEY_DELETE_CURSOR, LevelDBCursor.class);
-        if (null == deleteCursor) {
-            deleteCursor = new LevelDBCursor();
-            deleteCursor.setPageNo(headPageNo);
-            deleteCursor.setIndex(0);
-            put(KEY_DELETE_CURSOR, deleteCursor);
+        if (deleteCursor == null) {
+            deleteCursor = createDefaultCursor(KEY_DELETE_CURSOR, headPageNo);
         }
+    }
+
+    private LevelDBCursor createDefaultCursor(String cursorKey, long pageNo) throws PersistenceException {
+        LevelDBCursor levelDBCursor = new LevelDBCursor();
+        levelDBCursor.setPageNo(pageNo);
+        levelDBCursor.setIndex(0);
+
+        put(cursorKey, levelDBCursor);
+        return levelDBCursor;
     }
 
     protected Long calculateTotalCount() {
@@ -272,6 +310,7 @@ public class QueueMiddleComponent {
     }
 
     public String save(Message message) throws PersistenceException {
+        //锁被我外移至LevelDBQueue
 //        final ReentrantLock writeLock = this.writeLock;
 //		writeLock.lock();
         WriteBatch wb = adapter.getDb().createWriteBatch();
@@ -285,16 +324,17 @@ public class QueueMiddleComponent {
                 writeCursor = get(KEY_WRITE_CURSOR, LevelDBCursor.class);
                 if (null == writeCursor) {
                     writeCursor = new LevelDBCursor();
-                    writeCursor.setPageNo(rearPageNo);
+                    writeCursor.setPageNo(currentPageNo);
                     writeCursor.setIndex(1);
                     put(KEY_WRITE_CURSOR, writeCursor);
                 }
             }
 
             if (isCursorToTheEndPage(writeCursor)) {
+                //如果当前页写不下了，就创建新页
                 newPage(messageWrapper.getMsgId(), wb);
             } else {
-                //long writeIndex = writeCursor.getIndex();
+                //如果当前页写的下，把消息id存进当前页索引
                 currentPage.getIndexes().add(messageWrapper.getMsgId());
                 writeCursor.setIndex(currentPage.getIndexes().size());
                 put(KEY_WRITE_CURSOR, writeCursor, wb);
@@ -374,7 +414,7 @@ public class QueueMiddleComponent {
      * @throws PersistenceException
      */
     long calculateNextReadPage(int popSize, long nextIndex) throws PersistenceException {
-        /*if(readCursor.getPageNo() < rearPageNo){
+        /*if(readCursor.getPageNo() < currentPageNo){
             LevelDBPage page = getPage(readCursor.getPageNo());
 			long ps = page.getIndexes()==null?pageSize:page.getIndexes().size();
 			return (nextIndex/ps) + readCursor.getPageNo();
@@ -393,8 +433,9 @@ public class QueueMiddleComponent {
      * @throws PersistenceException
      */
     public Message peek() throws PersistenceException {
-        final ReentrantLock readLock = this.readLock;
-        readLock.lock();
+        //锁外移至LevelDBQueue
+//        final ReentrantLock readLock = this.readLock;
+//        readLock.lock();
         try {
             List<Message> list = _peek(1);
             if (list == null || list.size() == 0) {
@@ -402,7 +443,7 @@ public class QueueMiddleComponent {
             }
             return list.get(0);
         } finally {
-            readLock.unlock();
+//            readLock.unlock();
         }
     }
 
@@ -430,12 +471,13 @@ public class QueueMiddleComponent {
     }
 
     public List<Message> peek(int bulkSize) throws PersistenceException {
-        final ReentrantLock readLock = this.readLock;
-        readLock.lock();
+        //锁外移至LevelDBQueue
+//        final ReentrantLock readLock = this.readLock;
+//        readLock.lock();
         try {
             return _peek(bulkSize);
         } finally {
-            readLock.unlock();
+//            readLock.unlock();
         }
     }
 
@@ -453,21 +495,15 @@ public class QueueMiddleComponent {
         if (page == null || page.getIndexes() == null || page.getIndexes().size() == 0) {
             return;
         }
-        for (String msgId : page.getIndexes()) {
-            msgIds.add(msgId);
-            if (msgIds.size() == total) {
-                return;
-            }
-        }
-        //todo delete
-       /* for (int i = startIndex; i < page.getIndexes().size(); i++) {
+
+        for (int i = startIndex; i < page.getIndexes().size(); i++) {
             msgIds.add(page.getIndexes().get(i));
             if (msgIds.size() == total) {
                 return;
             }
-        }*/
+        }
 
-        //don't have unread message
+        //don't have more unread message
         if (page.getNo() == currentPage.getNo()) {
             return;
         }
@@ -481,18 +517,17 @@ public class QueueMiddleComponent {
     }
 
     void newPage(String msgId, WriteBatch wb) throws PersistenceException {
-        // TODO once page number is to the LONG maximum, it need to move page whole
         LevelDBPage page = new LevelDBPage();
         if (currentPage.getNo() == Long.MAX_VALUE) {
             currentPage.setNo(0);
         } else {
             page.setNo(currentPage.getNo() + 1);
         }
-        page.setIndexes(new ArrayList<String>());
+        page.setIndexes(new ArrayList<>());
         if (msgId != null && !"".equals(msgId)) {
             page.getIndexes().add(msgId);
         }
-        saveRearPageNo(page.getNo(), wb);
+        saveCurrentPageNo(page.getNo(), wb);
 
         currentPage = page;
         savePage(currentPage, wb);
@@ -502,9 +537,9 @@ public class QueueMiddleComponent {
         put(KEY_WRITE_CURSOR, writeCursor, wb);
     }
 
-    void saveRearPageNo(Long pageNo, WriteBatch wb) throws PersistenceException {
-        rearPageNo = pageNo;
-        put(KEY_REAR_PAGE_NO, rearPageNo, wb);
+    void saveCurrentPageNo(Long pageNo, WriteBatch wb) throws PersistenceException {
+        currentPageNo = pageNo;
+        put(KEY_CURRENT_PAGE_NO, currentPageNo, wb);
     }
 
     void savePage(LevelDBPage page, WriteBatch wb) throws PersistenceException {
@@ -534,13 +569,15 @@ public class QueueMiddleComponent {
         final ReentrantLock deleteLock = this.deleteLock;
         if (deleteLock.tryLock()) {
             try {
+                LevelDBCursor readCursorSnapshot = (LevelDBCursor) readCursor.clone();
                 if (deleteCursor.getPageNo() == headPageNo &&
-                        readCursor.getPageNo() == deleteCursor.getPageNo() && deleteCursor.getIndex() == readCursor.getIndex()) {
+                        readCursorSnapshot.getPageNo() == deleteCursor.getPageNo() && deleteCursor.getIndex() == readCursorSnapshot.getIndex()) {
                     return;
                 }
 
+                //===物理删除这些无效消息===
                 long pageNo = headPageNo;
-                for (int i = (int) pageNo; i < readCursor.getPageNo(); i++) {
+                for (long i = pageNo; i < readCursorSnapshot.getPageNo(); i++) {
                     LevelDBPage page = getPage(i);
                     List<String> indexes = page.getIndexes();
                     if (indexes == null || indexes.size() == 0) {
@@ -548,18 +585,47 @@ public class QueueMiddleComponent {
                     }
                     batchDelete(i, indexes.size(), indexes.toArray(new String[indexes.size()]));
                 }
-                if (readCursor.getIndex() > 0) {
-                    LevelDBPage page = getPage(readCursor.getPageNo());
-                    List<String> deleteIndexes = page.getIndexes().subList(0, (int) readCursor.getIndex());
+                if (readCursorSnapshot.getIndex() > 0) {
+                    LevelDBPage page = getPage(readCursorSnapshot.getPageNo());
+                    List<String> deleteIndexes = page.getIndexes().subList(0, (int) readCursorSnapshot.getIndex());
                     if (deleteIndexes.size() > 0) {
-                        batchDelete(readCursor.getPageNo(), deleteIndexes.size(), deleteIndexes.toArray(new String[deleteIndexes.size()]));
+                        batchDelete(readCursorSnapshot.getPageNo(), deleteIndexes.size(), deleteIndexes.toArray(new String[deleteIndexes.size()]));
                     }
+                }
 
+                //同时删除删除无效的消息索引结构数据(无效页)
+                long invaildPageNo = lastDelPageNo;
+                if (invaildPageNo + 1 < headPageNo) {
+                    List<String> invaildPageKey = new ArrayList<>();
+                    for (long i = invaildPageNo + 1; i < headPageNo; i++) {
+                        invaildPageKey.add(buildKey(KEY_PAGE, String.valueOf(i)));
+                    }
+                    batchDelete(invaildPageKey);
+                    lastDelPageNo = headPageNo - 1;
+                    put(KEY_LAST_DEL_PAGE_NO, lastDelPageNo);
                 }
             } finally {
                 deleteLock.unlock();
             }
 
+        }
+    }
+
+    private void batchDelete(List<String> keys) throws PersistenceException {
+        WriteBatch writeBatch = adapter.getDb().createWriteBatch();
+        try {
+            for (String key : keys) {
+                writeBatch.delete(wrapperKey(key).getBytes());
+            }
+            adapter.getDb().write(writeBatch);
+        } catch (Exception e) {
+            throw new PersistenceException(e);
+        } finally {
+            try {
+                writeBatch.close();
+            } catch (IOException e) {
+                throw new PersistenceException(e);
+            }
         }
     }
 
@@ -590,17 +656,23 @@ public class QueueMiddleComponent {
         }
     }
 
+    /**
+     * 清空消息队列 todo
+     *
+     * @throws Exception
+     */
     public synchronized void clear() throws Exception {
-        final Lock readLock = this.readLock;
-        final Lock writeLock = this.writeLock;
-        readLock.lock();
-        writeLock.lock();
-        try {
-            adapter.clear();
-            load();
-        } finally {
-            readLock.unlock();
-            writeLock.unlock();
-        }
+        //需要清空该队列在LevelDB中的消息数据，和消息索引结构数据
+        //读写锁都被我外移至LevelDBQueue了
+//        final Lock readLock = this.readLock;
+//        final Lock writeLock = this.writeLock;
+//        readLock.lock();
+//        writeLock.lock();
+//        try {
+//            load();
+//        } finally {
+//            readLock.unlock();
+//            writeLock.unlock();
+//        }
     }
 }

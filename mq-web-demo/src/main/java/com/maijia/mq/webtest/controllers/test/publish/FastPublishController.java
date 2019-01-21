@@ -1,6 +1,7 @@
 package com.maijia.mq.webtest.controllers.test.publish;
 
 import com.maijia.mq.client.*;
+import com.maijia.mq.util.ConstantUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,7 +49,7 @@ public class FastPublishController {
         // 创建连接工厂
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(host);
-        factory.setPort(3198);
+        factory.setPort(ConstantUtils.NIO_RPC_PORT);
         factory.setMode(FactoryMode.FAST);
         Connection connection = factory.newConnection();
         final Channel channel = connection.createChannel();

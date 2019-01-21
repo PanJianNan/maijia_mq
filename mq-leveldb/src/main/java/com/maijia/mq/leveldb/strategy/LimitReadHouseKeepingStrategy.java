@@ -17,10 +17,10 @@ public class LimitReadHouseKeepingStrategy extends AbstractHouseKeepingStrategy 
     /**
      * 读取队列达到一定数量后开始执行
      */
-    private int readLimitSize = 1000;
+    private int readLimitSize = 10000;
 
     /**
-     * 检查读取数量的间隔
+     * 检查读取数量的时间间隔ms
      */
     private long checkInterval = 10000L;
 
@@ -68,7 +68,7 @@ public class LimitReadHouseKeepingStrategy extends AbstractHouseKeepingStrategy 
     class CheckReadThread extends Thread {
 
         public CheckReadThread() {
-            super("hp-check-limit-thread");
+            super("leveldb-invaild-msg-del-thread");
         }
 
         @Override
