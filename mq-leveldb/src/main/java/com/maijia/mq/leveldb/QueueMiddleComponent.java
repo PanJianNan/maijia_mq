@@ -453,19 +453,13 @@ public class QueueMiddleComponent {
         if (page == null || page.getIndexes() == null || page.getIndexes().size() == 0) {
             return;
         }
-        for (String msgId : page.getIndexes()) {
-            msgIds.add(msgId);
-            if (msgIds.size() == total) {
-                return;
-            }
-        }
-        //todo delete
-       /* for (int i = startIndex; i < page.getIndexes().size(); i++) {
+
+        for (int i = startIndex; i < page.getIndexes().size(); i++) {
             msgIds.add(page.getIndexes().get(i));
             if (msgIds.size() == total) {
                 return;
             }
-        }*/
+        }
 
         //don't have unread message
         if (page.getNo() == currentPage.getNo()) {
