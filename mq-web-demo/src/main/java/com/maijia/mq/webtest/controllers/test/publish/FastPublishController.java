@@ -52,7 +52,7 @@ public class FastPublishController {
         factory.setPort(ConstantUtils.NIO_RPC_PORT);
         factory.setMode(FactoryMode.FAST);
         Connection connection = factory.newConnection();
-        final Channel channel = connection.createChannel();
+        final MqChannel channel = connection.createChannel();
         channel.setMqService(factory.getMqService());
         channel.queueDeclare(queueName);
         channel.exchangeDeclare(exchangeName, ExchangeType.DIRECT);
@@ -91,7 +91,7 @@ public class FastPublishController {
         factory.setPort(3198);
         factory.setMode(FactoryMode.FAST);
         Connection connection = factory.newConnection();
-        final Channel channel = connection.createChannel();
+        final MqChannel channel = connection.createChannel();
         channel.setMqService(factory.getMqService());
         channel.queueDeclare(queueName);
         channel.exchangeDeclare(exchangeName, ExchangeType.FANOUT);

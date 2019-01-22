@@ -38,7 +38,7 @@ public class FilePublishController {
         factory.setPort(ConstantUtils.NIO_RPC_PORT);
         factory.setMode(FactoryMode.FILE);
         Connection connection = factory.newConnection();
-        final Channel channel = connection.createChannel();
+        final MqChannel channel = connection.createChannel();
         channel.setMqService(factory.getMqService());
         channel.queueDeclare(queueName);
         channel.exchangeDeclare(exchangeName, ExchangeType.DIRECT);
@@ -87,7 +87,7 @@ public class FilePublishController {
         factory.setPort(ConstantUtils.NIO_RPC_PORT);
         factory.setMode(FactoryMode.FILE);
         Connection connection = factory.newConnection();
-        final Channel channel = connection.createChannel();
+        final MqChannel channel = connection.createChannel();
         channel.setMqService(factory.getMqService());
         channel.exchangeDeclare(exchangeName, ExchangeType.FANOUT);//如果是对分组进行广播，则不需要队列名
 
@@ -138,7 +138,7 @@ public class FilePublishController {
         factory.setPort(ConstantUtils.NIO_RPC_PORT);
         factory.setMode(FactoryMode.FILE);
         Connection connection = factory.newConnection();
-        final Channel channel = connection.createChannel();
+        final MqChannel channel = connection.createChannel();
         channel.setMqService(factory.getMqService());
         channel.queueDeclare(queueName);
         channel.exchangeDeclare(exchangeName, ExchangeType.DIRECT);

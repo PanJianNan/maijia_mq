@@ -1,6 +1,4 @@
-package com.maijia.mq;
-
-import com.maijia.mq.util.ConstantUtils;
+package com.maijia.mq.util;
 
 /**
  * NettyUtils

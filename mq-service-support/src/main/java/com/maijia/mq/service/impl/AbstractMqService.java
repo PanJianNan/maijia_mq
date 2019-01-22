@@ -1,6 +1,6 @@
 package com.maijia.mq.service.impl;
 
-import com.maijia.mq.client.Channel;
+import com.maijia.mq.client.MqChannel;
 import com.maijia.mq.client.Connection;
 import com.maijia.mq.client.ExchangeType;
 import com.maijia.mq.core.ExchangeCenter;
@@ -74,7 +74,7 @@ public abstract class AbstractMqService {
         }
     }
 
-    protected boolean produce(Channel channel, Object rawMsg, ExchangeCenter exchangeCenter, Producer producer) throws IOException, InterruptedException {
+    protected boolean produce(MqChannel channel, Object rawMsg, ExchangeCenter exchangeCenter, Producer producer) throws IOException, InterruptedException {
         if (channel == null) {
             throw new NullPointerException("channel can't be NULL");
         }

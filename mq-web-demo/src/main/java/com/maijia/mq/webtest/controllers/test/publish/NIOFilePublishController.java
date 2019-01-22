@@ -44,7 +44,7 @@ public class NIOFilePublishController {
         factory.setPort(3198);
         factory.setMode(FactoryMode.FILE);
         Connection connection = factory.newConnection();
-        final Channel channel = connection.createChannel();
+        final MqChannel channel = connection.createChannel();
         channel.setMqService(factory.getMqService());
         channel.queueDeclare(queueName);
         channel.exchangeDeclare(exchangeName, ExchangeType.DIRECT);

@@ -1,6 +1,7 @@
 package com.maijia.mq.console;
 
 import com.alibaba.fastjson.JSONObject;
+import com.maijia.mq.MagicEnum;
 import com.maijia.mq.MjMqProtocol;
 import com.maijia.mq.MqSession;
 import com.maijia.mq.consumer.Consumer;
@@ -47,7 +48,12 @@ public class MqServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 //        LOGGER.debug("服务端开始读取客户端过来的请求");
-        ChannelReadThread channelReadThread = new ChannelReadThread(ctx, msg);
+        MjMqProtocol protocol = (MjMqProtocol) msg;
+        if (protocol.getMagic() == MagicEnum.PING.getValue() || protocol.getMagic() == MagicEnum.PONG.getValue())  {
+            //心跳包暂不处理
+            return;
+        }
+        ChannelReadThread channelReadThread = new ChannelReadThread(ctx, protocol);
         ThreadPoolHolder.mqServerHandlerPool.execute(channelReadThread);
     }
 
@@ -87,14 +93,19 @@ public class MqServerHandler extends ChannelInboundHandlerAdapter {
         ctx.channel().attr(AttributeKey.<MqSession>valueOf(channelId)).set(session);
     }
 
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        super.userEventTriggered(ctx, evt);
+    }
+
     private class ChannelReadThread implements Runnable {
 
         private ChannelHandlerContext ctx;
-        private Object msg;
+        private MjMqProtocol protocol;
 
-        public ChannelReadThread(ChannelHandlerContext ctx, Object msg) {
+        public ChannelReadThread(ChannelHandlerContext ctx, MjMqProtocol protocol) {
             this.ctx = ctx;
-            this.msg = msg;
+            this.protocol = protocol;
         }
 
         @Override
@@ -106,8 +117,6 @@ public class MqServerHandler extends ChannelInboundHandlerAdapter {
                 // 检测是否 自己注册的 客户端
                 MqSession session = ctx.channel().attr(AttributeKey.<MqSession>valueOf(channelId)).get();
 
-                MjMqProtocol protocol = (MjMqProtocol) msg;
-
                 if (protocol == null || session == null) {
                     LOGGER.error("protocol或session为null");
                     return;
@@ -117,12 +126,17 @@ public class MqServerHandler extends ChannelInboundHandlerAdapter {
                 byte[] data = protocol.getContent();
                 String requestStr = HessianSerializeUtils.deserialize(data);
 
-                //确认消息被客户端消费成功
-                if ("@success@".equals(requestStr)) {
+                //收到客户端的ACK消息，确认消息被客户端消费成功
+                if (protocol.getMagic() == MagicEnum.ACK.getValue()) {
                     Object obj = failMsgMap.remove(session.getId());
                     LOGGER.debug(String.format("客户端成功消费一条消息 msg:%s", JSONObject.toJSONString(obj)));
                     return;
                 }
+//                if ("@success@".equals(requestStr)) {
+//                    Object obj = failMsgMap.remove(session.getId());
+//                    LOGGER.debug(String.format("客户端成功消费一条消息 msg:%s", JSONObject.toJSONString(obj)));
+//                    return;
+//                }
 
                 //返回消息
                 Message message = consumer.take(requestStr);//todo 可能会造成线程等待（parking，处于WAITING状态），这样就会造成线程资源的占用

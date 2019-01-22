@@ -1,5 +1,7 @@
 package com.maijia.mq.client;
 
+import com.maijia.mq.AckPingPong;
+import com.maijia.mq.MagicEnum;
 import com.maijia.mq.MjMqProtocol;
 import com.maijia.mq.domain.Message;
 import com.maijia.mq.service.MQConsumer;
@@ -7,6 +9,7 @@ import com.maijia.mq.util.HessianSerializeUtils;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.EventLoopGroup;
 import org.apache.log4j.Logger;
 
 /**
@@ -18,20 +21,22 @@ import org.apache.log4j.Logger;
 public class MqClientHandler extends ChannelInboundHandlerAdapter {
 
 	private static final Logger LOGGER = Logger.getLogger(MqClientHandler.class);
+
+	private MqClient mqClient;
+
 	private String queueName;
 	private MQConsumer mqConsumer;
-
 	private boolean loopRequset = false;
 
-	public MqClientHandler(String queueName, MQConsumer mqConsumer) {
-		this.queueName = queueName;
-		this.mqConsumer = mqConsumer;
-	}
+	private EventLoopGroup eventLoopGroup;
 
-	public MqClientHandler(String queueName, MQConsumer mqConsumer, boolean loopRequset) {
-		this.queueName = queueName;
-		this.mqConsumer = mqConsumer;
-		this.loopRequset = loopRequset;
+	public MqClientHandler(MqClient mqClient) {
+		this.mqClient = mqClient;
+		this.queueName = mqClient.getQueueName();
+		this.mqConsumer = mqClient.getMqConsumer();
+		this.loopRequset = mqClient.isLoopRequest();
+
+		this.eventLoopGroup = mqClient.getEventLoopGroup();
 	}
 
 	@Override
@@ -41,10 +46,24 @@ public class MqClientHandler extends ChannelInboundHandlerAdapter {
 		//向服务端请求消息数据
 		ctx.writeAndFlush(queueName);
 	}
+	@Override
+	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+		if (loopRequset) {
+			mqClient.doConnect();
+		} else {
+			eventLoopGroup.shutdownGracefully();
+		}
+		super.channelInactive(ctx);
+	}
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		ChannelReadThread channelReadThread = new ChannelReadThread(ctx, msg);
+		MjMqProtocol protocol = (MjMqProtocol) msg;
+		if (protocol.getMagic() == MagicEnum.PING.getValue() || protocol.getMagic() == MagicEnum.PONG.getValue())  {
+			//心跳包暂不处理
+			return;
+		}
+		ChannelReadThread channelReadThread = new ChannelReadThread(ctx, protocol);
 		ClientThreadPoolHolder.mqClientHandlerPool.execute(channelReadThread);
 	}
 
@@ -58,17 +77,16 @@ public class MqClientHandler extends ChannelInboundHandlerAdapter {
 	private class ChannelReadThread implements Runnable {
 
 		private ChannelHandlerContext ctx;
-		private Object msg;
+		private MjMqProtocol protocol;
 
-		public ChannelReadThread(ChannelHandlerContext ctx, Object msg) {
+		public ChannelReadThread(ChannelHandlerContext ctx, MjMqProtocol protocol) {
 			this.ctx = ctx;
-			this.msg = msg;
+			this.protocol = protocol;
 		}
 
 		@Override
 		public void run() {
 			try {
-				MjMqProtocol protocol = (MjMqProtocol) msg;
 				byte[] data = protocol.getContent();
 
 				Object obj = HessianSerializeUtils.deserialize(data);
@@ -80,7 +98,7 @@ public class MqClientHandler extends ChannelInboundHandlerAdapter {
 				//进行消费
 				mqConsumer.handleDelivery((Message) obj);//todo 可能会造成阻塞，如果客户操作过重的话，导致线程资源占用
 
-				ctx.writeAndFlush("@success@").addListener((ChannelFuture writeFuture) -> {
+				ctx.writeAndFlush(AckPingPong.ACK).addListener((ChannelFuture writeFuture) -> {
 					//消息发送成功
 					if (writeFuture.isSuccess()) {
 						if (loopRequset) {
@@ -103,4 +121,5 @@ public class MqClientHandler extends ChannelInboundHandlerAdapter {
 			}
 		}
 	}
+
 }

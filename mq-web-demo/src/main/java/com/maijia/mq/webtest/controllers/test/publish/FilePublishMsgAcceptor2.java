@@ -37,7 +37,7 @@ public class FilePublishMsgAcceptor2 extends AbstractMessageAcceptor {
         factory.setMode(FactoryMode.FILE);
 
         Connection connection = factory.newConnection();
-        Channel channel = connection.createChannel();
+        MqChannel channel = connection.createChannel();
         channel.queueDeclare(queueName);//注册需要消息队列名
         channel.setMqService(factory.getMqService());//尴尬
         channel.exchangeDeclare(exchangeName);

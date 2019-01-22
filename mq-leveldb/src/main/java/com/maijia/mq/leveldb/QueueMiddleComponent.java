@@ -579,6 +579,10 @@ public class QueueMiddleComponent {
                 long pageNo = headPageNo;
                 for (long i = pageNo; i < readCursorSnapshot.getPageNo(); i++) {
                     LevelDBPage page = getPage(i);
+                    if (page == null) {
+                        logger.error(String.format("page is NULL when physical delele invaild msgs, queueName:s% , pageNo:%s", queueName, headPageNo));
+                        continue;
+                    }
                     List<String> indexes = page.getIndexes();
                     if (indexes == null || indexes.size() == 0) {
                         continue;

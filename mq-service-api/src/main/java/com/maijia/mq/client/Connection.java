@@ -34,8 +34,8 @@ public class Connection implements Serializable {
     /**
      * new channel
      */
-    public Channel createChannel() {
-        return new Channel(host, port);
+    public MqChannel createChannel() {
+        return new MqChannel(host, port);
     }
 
     public void close() {

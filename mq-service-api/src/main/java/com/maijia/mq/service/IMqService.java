@@ -1,6 +1,6 @@
 package com.maijia.mq.service;
 
-import com.maijia.mq.client.Channel;
+import com.maijia.mq.client.MqChannel;
 import com.maijia.mq.client.Connection;
 
 import java.io.IOException;
@@ -30,7 +30,7 @@ public interface IMqService {
      * @param rawMsg  消息
      * @return
      */
-    boolean produce(Channel channel, Object rawMsg) throws IOException, InterruptedException;
+    boolean produce(MqChannel channel, Object rawMsg) throws IOException, InterruptedException;
 
     /**
      * 消费消息

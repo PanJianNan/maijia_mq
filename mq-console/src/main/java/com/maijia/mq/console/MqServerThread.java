@@ -12,6 +12,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 import org.apache.log4j.Logger;
 
 /**
@@ -52,8 +53,10 @@ public class MqServerThread implements Runnable {
                     //用于向你的Channel当中添加ChannelInboundHandler的实现
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         public void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new MjMqProtocolDecoder(65536, 0, 2));
+                            ch.pipeline().addLast(new IdleStateHandler(10, 0, 0));
+                            ch.pipeline().addLast(new MjMqProtocolDecoder(65536, 1, 2));
                             ch.pipeline().addLast(new MjMqProtocolEncoder());
+                            ch.pipeline().addLast(new MqServerIdleHandler());
                             ch.pipeline().addLast(new MqServerHandler(consumer, producer));
                         }
 
@@ -62,21 +65,21 @@ public class MqServerThread implements Runnable {
                     //注意以下是socket的标准参数
                     //BACKLOG用于构造服务端套接字ServerSocket对象，标识当服务器请求处理线程全满时，用于临时存放已完成三次握手的请求的队列的最大长度。如果未设置或所设置的值小于1，Java将使用默认值50。
                     //Option是为了NioServerSocketChannel设置的，用来接收传入连接的
-                    .option(ChannelOption.SO_BACKLOG, 128)
+                    .option(ChannelOption.SO_BACKLOG, 1024)
                     //是否启用心跳保活机制。在双方TCP套接字建立连接后（即都进入ESTABLISHED状态）并且在两个小时左右上层没有任何数据传输的情况下，这套机制才会被激活。
                     //childOption是用来给父级ServerChannel之下的Channels设置参数的
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
 //                    .childOption(ChannelOption.AUTO_READ, true);//设为false的话，客户端连接异常关闭，服务端会感知不到，造成大量CLOSE_WAIT现象
 
             // 绑定并开始接受传入的连接。
-            ChannelFuture f = b.bind(port).sync();
+            ChannelFuture channelFuture = b.bind(port).sync();
 
             //等到服务器socket关闭。
             // 在这个例子中，这种情况不会发生，但你可以优雅的做到这一点
             // 关闭服务器.
             //sync()会同步等待连接操作结果，用户线程将在此wait()，直到连接操作完成之后，线程被notify(),用户代码继续执行
             //closeFuture()当Channel关闭时返回一个ChannelFuture,用于链路检测
-            f.channel().closeFuture().sync();
+            channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             LOGGER.error(e.getMessage(), e);
         } finally {

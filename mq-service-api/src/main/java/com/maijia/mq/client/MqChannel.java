@@ -1,19 +1,8 @@
 package com.maijia.mq.client;
 
-import com.maijia.mq.MjMqProtocolDecoder;
-import com.maijia.mq.MjMqProtocolEncoder;
 import com.maijia.mq.service.IMqService;
 import com.maijia.mq.service.MQConsumer;
-import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -24,9 +13,7 @@ import java.io.Serializable;
  * @author panjn
  * @date 2016/12/27
  */
-public class Channel implements Serializable {
-
-    private final transient Logger logger = Logger.getLogger(this.getClass());
+public class MqChannel implements Serializable {
 
     private String host = "localhost";
     private int port = -1;
@@ -37,10 +24,10 @@ public class Channel implements Serializable {
 
     private boolean loopRequest;
 
-    public Channel() {
+    public MqChannel() {
     }
 
-    public Channel(String host, int port) {
+    public MqChannel(String host, int port) {
         this.host = host;
         this.port = port;
     }
@@ -137,33 +124,8 @@ public class Channel implements Serializable {
         //register exchange
         mqService.registerExchange(exchangeName, queueName);
 
-        EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
-        try {
-            Bootstrap bootstrap = new Bootstrap();
-            bootstrap.channel(NioSocketChannel.class);
-            bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
-            bootstrap.group(eventLoopGroup);
-            bootstrap.remoteAddress(host, port);
-            bootstrap.handler(new ChannelInitializer<SocketChannel>() {
-                @Override
-                protected void initChannel(SocketChannel socketChannel) throws Exception {
-                    socketChannel.pipeline().addLast(new MjMqProtocolDecoder(65536, 0, 2));
-                    socketChannel.pipeline().addLast(new MjMqProtocolEncoder());
-                    socketChannel.pipeline().addLast(new MqClientHandler(queueName, mqConsumer, loopRequest));
-                }
-            });
-            ChannelFuture future = bootstrap.connect(host, port).sync();
-            if (future.isSuccess()) {
-//                SocketChannel socketChannel = (SocketChannel) future.channel();
-                System.out.println("------connect server success------");
-            }
-            future.channel().closeFuture().sync();
-        } catch (InterruptedException e) {
-            throw e;
-//            logger.error(e.getMessage(), e);
-        } finally {
-            eventLoopGroup.shutdownGracefully();
-        }
+        MqClient mqClient = new MqClient(queueName, mqConsumer, loopRequest);
+        mqClient.connect(host, port);
 
     }
 

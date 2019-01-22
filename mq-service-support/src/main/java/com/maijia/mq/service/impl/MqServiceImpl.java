@@ -1,6 +1,6 @@
 package com.maijia.mq.service.impl;
 
-import com.maijia.mq.client.Channel;
+import com.maijia.mq.client.MqChannel;
 import com.maijia.mq.client.Connection;
 import com.maijia.mq.consumer.Consumer;
 import com.maijia.mq.core.ExchangeCenter;
@@ -54,7 +54,7 @@ public class MqServiceImpl extends AbstractMqService implements IMqService {
      * @return
      */
     @Override
-    public boolean produce(Channel channel, Object rawMsg) throws IOException, InterruptedException {
+    public boolean produce(MqChannel channel, Object rawMsg) throws IOException, InterruptedException {
         return this.produce(channel, rawMsg, exchangeCenter, levelDBProducer);
     }
 
