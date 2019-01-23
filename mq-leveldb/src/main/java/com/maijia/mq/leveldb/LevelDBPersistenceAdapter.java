@@ -190,8 +190,8 @@ public class LevelDBPersistenceAdapter implements Closeable {
         return options;
     }
 
-    public synchronized void open() throws IOException {
-        if (null != db) {
+    protected synchronized void open() throws IOException {
+        if (db != null) {
             return;
         }
         Options options = createOptions();
@@ -236,7 +236,7 @@ public class LevelDBPersistenceAdapter implements Closeable {
      * @return 返回的是msgId
      * @throws PersistenceException
      */
-    public String save(Message message) throws PersistenceException {
+    protected String save(Message message) throws PersistenceException {
         MessageWrapper wrapper = new MessageWrapper(nextId(), message);
         put(wrapper.getMsgId(), wrapper);
         if (logger.isDebugEnabled()) {
@@ -245,7 +245,7 @@ public class LevelDBPersistenceAdapter implements Closeable {
         return wrapper.getMsgId();
     }
 
-    public void houseKeeping() throws PersistenceException {
+    protected void houseKeeping() throws PersistenceException {
         List<MessageWrapper> list = null;
         final int count = 500;
         while ((list = list(count)).size() > 0) {
@@ -263,7 +263,7 @@ public class LevelDBPersistenceAdapter implements Closeable {
      * @param batchSize
      * @throws PersistenceException
      */
-    public List<MessageWrapper> list(int batchSize) throws PersistenceException {
+    protected List<MessageWrapper> list(int batchSize) throws PersistenceException {
         DBIterator iterator = db.iterator();
         iterator.seekToFirst();
         return list(batchSize, iterator);
@@ -276,7 +276,7 @@ public class LevelDBPersistenceAdapter implements Closeable {
      * @param type
      * @throws PersistenceException
      */
-    public <T> T get(String key, Class<T> type) throws PersistenceException {
+    protected <T> T get(String key, Class<T> type) throws PersistenceException {
         try {
             return HessianSerializeUtils.deserialize(db.get(key.getBytes()));
         } catch (Exception e) {
@@ -284,7 +284,7 @@ public class LevelDBPersistenceAdapter implements Closeable {
         }
     }
 
-    public <T> List<T> getMore(Class<T> type, String... keys) throws PersistenceException {
+    protected <T> List<T> getMore(Class<T> type, String... keys) throws PersistenceException {
         List<T> list = new ArrayList<>(keys.length);
         for (String key : keys) {
             list.add(get(key, type));
@@ -292,7 +292,7 @@ public class LevelDBPersistenceAdapter implements Closeable {
         return list;
     }
 
-    public List<MessageWrapper> list(int batchSize, DBIterator iterator) throws PersistenceException {
+    protected List<MessageWrapper> list(int batchSize, DBIterator iterator) throws PersistenceException {
         List<MessageWrapper> list = new ArrayList<>();
         try {
             int index = 0;
@@ -312,7 +312,7 @@ public class LevelDBPersistenceAdapter implements Closeable {
         return db.iterator();
     }
 
-    public void deleteById(String[] ids) throws PersistenceException {
+    protected void deleteById(String[] ids) throws PersistenceException {
         WriteBatch wb = db.createWriteBatch();
         try {
             for (String msgId : ids) {
@@ -376,7 +376,7 @@ public class LevelDBPersistenceAdapter implements Closeable {
         return db;
     }
 
-    public synchronized void clear() throws IOException {
+    protected synchronized void clear() throws IOException {
         while (_clear() > 0) {
 
         }

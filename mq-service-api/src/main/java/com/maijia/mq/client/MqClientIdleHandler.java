@@ -3,11 +3,8 @@ package com.maijia.mq.client;
 import com.maijia.mq.AckPingPong;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.apache.log4j.Logger;
-
-import static io.netty.handler.timeout.IdleState.READER_IDLE;
 
 /**
  * 客户端Idler Handler

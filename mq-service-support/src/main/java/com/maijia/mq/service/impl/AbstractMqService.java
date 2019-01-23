@@ -1,8 +1,8 @@
 package com.maijia.mq.service.impl;
 
-import com.maijia.mq.client.MqChannel;
 import com.maijia.mq.client.Connection;
 import com.maijia.mq.client.ExchangeType;
+import com.maijia.mq.client.MqChannel;
 import com.maijia.mq.core.ExchangeCenter;
 import com.maijia.mq.producer.Producer;
 import com.maijia.mq.rpc.MqListenThread;
@@ -11,8 +11,6 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * AbstractMqService
@@ -58,20 +56,7 @@ public abstract class AbstractMqService {
     }
 
     protected void registerExchange(ExchangeCenter exchangeCenter, String exchangeName, String queueName) {
-        if (StringUtils.isBlank(exchangeName)) {
-            throw new IllegalArgumentException("exchangeName can't be blank");
-        }
-        if (StringUtils.isBlank(queueName)) {
-            throw new IllegalArgumentException("queueName can't be blank");
-        }
-        Set<String> queueSet = exchangeCenter.exchangeMap.get(exchangeName);
-        if (queueSet == null) {
-            queueSet = new HashSet();
-            queueSet.add(queueName);
-            exchangeCenter.exchangeMap.put(exchangeName, queueSet);
-        } else {
-            queueSet.add(queueName);
-        }
+        exchangeCenter.registeExchange(exchangeName, queueName);
     }
 
     protected boolean produce(MqChannel channel, Object rawMsg, ExchangeCenter exchangeCenter, Producer producer) throws IOException, InterruptedException {

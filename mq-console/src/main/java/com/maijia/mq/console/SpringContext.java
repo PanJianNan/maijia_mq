@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 import java.io.*;
 import java.util.Properties;
@@ -29,21 +28,20 @@ public class SpringContext {
         String[] configs = {"classpath*:spring/spring-application-context.xml", "classpath*:spring/spring-cache-default.xml"};
 
         //加载配置文件
-        String path = SpringContext.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        File file = new File(path);
-        if (file != null) {
-            path = file.getParentFile().getParentFile().getAbsolutePath();
-            path = path + "/conf/mjmq.properties";
-
-            try (InputStream in = new BufferedInputStream(new FileInputStream(path))) {
+        InputStream inputStream = SpringContext.class.getClassLoader().getResourceAsStream("conf" + File.separator + "mjmq-server.properties");
+        if (inputStream == null) {
+            LOGGER.warn("missing mjmq-server.properties");
+        } else {
+            try (InputStream in = new BufferedInputStream(inputStream)) {
                 Properties p = new Properties();
                 p.load(in);
+
                 String useredis = p.getProperty("useredis");
                 if ("true".equals(useredis)) {
                     configs = new String[]{"classpath*:spring/spring-application-context.xml", "classpath*:spring/spring-redis.xml"};
                 }
             } catch (FileNotFoundException e) {
-                LOGGER.warn("missing mjmq.properties");
+                LOGGER.warn("missing mjmq-server.properties");
             } catch (IOException e) {
                 e.printStackTrace();
                 LOGGER.error(e.getMessage(), e);

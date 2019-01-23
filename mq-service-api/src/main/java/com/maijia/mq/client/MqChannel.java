@@ -101,8 +101,11 @@ public class MqChannel implements Serializable {
         }
 
         if (ExchangeType.DIRECT.equals(exchangeType)) {
-            //register exchange
-            mqService.registerExchange(exchangeName, queueName);
+            if (!Exchanges.contains(exchangeName, queueName)) {
+                //register exchange
+                mqService.registerExchange(exchangeName, queueName);
+                Exchanges.put(exchangeName, queueName);
+            }
         }
 
         mqService.produce(this, rawMsg);

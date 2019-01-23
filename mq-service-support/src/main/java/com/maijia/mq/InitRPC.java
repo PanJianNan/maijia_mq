@@ -3,6 +3,7 @@ package com.maijia.mq;
 import com.maijia.mq.rpc.CustomBeanFactory;
 import com.maijia.mq.rpc.RpcFramework;
 import com.maijia.mq.service.ICacheMqService;
+import com.maijia.mq.service.IExchangeService;
 import com.maijia.mq.service.IFastMqService;
 import com.maijia.mq.service.IFileMqService;
 import org.springframework.stereotype.Component;
@@ -30,5 +31,7 @@ public class InitRPC {
         RpcFramework.export(ICacheMqService.class, customBeanFactory.getBean("cacheMqServiceImpl"), RpcFramework.DEFAULT_VERSION);
 //        FileMqServiceImpl fileMqService = new FileMqServiceImpl();
         RpcFramework.export(IFileMqService.class, customBeanFactory.getBean("fileMqServiceImpl"), RpcFramework.DEFAULT_VERSION);
+
+        RpcFramework.export(IExchangeService.class, customBeanFactory.getBean("exchangeServiceImpl"), RpcFramework.DEFAULT_VERSION);
     }
 }
