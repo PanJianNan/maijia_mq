@@ -22,7 +22,7 @@ public class Message<E> implements Serializable {
 
     public Message(E content) {
         this.content = content;
-        this.timestamp = new Date().getTime();
+        this.timestamp = System.currentTimeMillis();
     }
 
     public long getTimestamp() {
