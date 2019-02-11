@@ -4,7 +4,7 @@ import com.maijia.mq.client.*;
 import com.maijia.mq.domain.Message;
 import com.maijia.mq.service.MQConsumer;
 import com.maijia.mq.service.impl.DefaultMQConsumer;
-import com.maijia.mq.util.ConstantUtils;
+import com.maijia.mq.constant.CommonConstant;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -33,7 +33,7 @@ public class FilePublishMsgAcceptor extends AbstractMessageAcceptor {
         // 创建连接工厂
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(host);
-        factory.setPort(ConstantUtils.NIO_RPC_PORT);
+        factory.setPort(CommonConstant.NIO_RPC_PORT);
         factory.setMode(FactoryMode.FILE);
 
         Connection connection = factory.newConnection();

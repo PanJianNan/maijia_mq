@@ -17,7 +17,11 @@
 	<context:component-scan base-package="com.maijia.mq.webtest.aspect">
 	</context:component-scan>
 
-	<aop:aspectj-autoproxy/><!--<aop:aspectj-autoproxy proxy-target-class="true"/>会强制使用cglib代理-->
+	<!--todo 有点丑陋，客户端zk相关的最好改成xml配置-->
+	<context:component-scan base-package="com.maijia.mq.client">
+	</context:component-scan>
+
+	<aop:aspectj-autoproxy/><!--<aop:aspectj-autoproxy proxy-target-class="true"/>会强制使用cglib代理，否则看情况（是否继承接口）选择jdk代理还是cglib代理-->
 
 
 </beans>

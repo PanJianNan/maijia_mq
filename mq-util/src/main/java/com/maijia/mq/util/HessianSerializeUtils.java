@@ -16,6 +16,9 @@ import java.io.IOException;
  */
 public class HessianSerializeUtils {
 
+    private HessianSerializeUtils() {
+    }
+
     /**
      * 序列化对象
      *

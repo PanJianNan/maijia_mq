@@ -111,6 +111,19 @@
         <aop:advisor advice-ref="transactionAdvice" pointcut-ref="transactionPointcut" />
     </aop:config>
 
+    <!--aop的一种写法,如果走xml配置的话，感觉这种方式爽一点，因为自定义advice类不需要实现MethodBeforeAdvice之类的接口，通过before after之类的标签来定位方法-->
+<!--    <bean id="testAdvice" class="com.myspring.app.aop.MyAdvice"/>
+    //切面代码
+    <aop:config>
+        <aop:aspect ref="transactionAdvice" id="testAspect">
+            <aop:pointcut
+                    expression="execution(* com.maijia.mq.webtest.*.*(..)) or execution(* com.maijia.mq.webtest.controllers..*(..))"
+                    id="testPointcut"/>
+            <aop:before method="doBefore" pointcut-ref="transactionPointcut"/>
+            <aop:after pointcut="execution(* com.lei.demo.aop.schema..*.*(..))" method="doAfter" />
+        </aop:aspect>
+    </aop:config>-->
+
 	<!-- 配置SqlSessionFactoryBean -->
 	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="dataSource" ref="dataSource"/>

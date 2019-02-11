@@ -7,7 +7,7 @@ import com.maijia.mq.consumer.RedisConsumer;
 import com.maijia.mq.producer.DefaultProducer;
 import com.maijia.mq.producer.LevelDBProducer;
 import com.maijia.mq.producer.RedisProducer;
-import com.maijia.mq.util.ConstantUtils;
+import com.maijia.mq.constant.CommonConstant;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -59,9 +59,9 @@ public class InitNioThread {
     }
 
     private void initMqListenThread() {
-        Thread fastMqListenThread = new Thread(new MqServerThread(ConstantUtils.FAST_MQ_LISTEN_PORT, defaultConsumer, defaultProducer), "MqServerThread-FAST");
-        Thread cacheMqListenThread = new Thread(new MqServerThread(ConstantUtils.CACHE_MQ_LISTEN_PORT, redisConsumer, redisProducer), "MqServerThread-CACHE");
-        Thread fileMqListenThread = new Thread(new MqServerThread(ConstantUtils.FILE_MQ_LISTEN_PORT, levelDBConsumer, levelDBProducer), "MqServerThread-FILE");
+        Thread fastMqListenThread = new Thread(new MqServerThread(CommonConstant.FAST_MQ_LISTEN_PORT, defaultConsumer, defaultProducer), "MqServerThread-FAST");
+        Thread cacheMqListenThread = new Thread(new MqServerThread(CommonConstant.CACHE_MQ_LISTEN_PORT, redisConsumer, redisProducer), "MqServerThread-CACHE");
+        Thread fileMqListenThread = new Thread(new MqServerThread(CommonConstant.FILE_MQ_LISTEN_PORT, levelDBConsumer, levelDBProducer), "MqServerThread-FILE");
 
         fastMqListenThread.start();
         cacheMqListenThread.start();

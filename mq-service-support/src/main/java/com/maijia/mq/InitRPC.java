@@ -25,6 +25,7 @@ public class InitRPC {
 
     @PostConstruct
     public void init() throws Exception {
+
 //        IFastMqService fastMqService = new FastMqServiceImpl();
         RpcFramework.export(IFastMqService.class, customBeanFactory.getBean("fastMqServiceImpl"), RpcFramework.DEFAULT_VERSION);
 //        ICacheMqService cacheMqService = new CacheMqServiceImpl();

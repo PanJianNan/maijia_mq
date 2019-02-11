@@ -2,7 +2,7 @@ package com.maijia.mq.webtest.controllers.test.publish;
 
 import com.maijia.mq.client.*;
 import com.maijia.mq.domain.Message;
-import com.maijia.mq.util.ConstantUtils;
+import com.maijia.mq.constant.CommonConstant;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -87,7 +87,7 @@ public class NIOFilePublishController {
         //3. 设置通道非阻塞模式
         sChannel.configureBlocking(false);
         //4. 创建连接
-        sChannel.connect(new InetSocketAddress(host, ConstantUtils.NIO_MSG_TRANSFER_PORT));
+        sChannel.connect(new InetSocketAddress(host, CommonConstant.NIO_MSG_TRANSFER_PORT));
         //5. 将通道注册到选择器上
         sChannel.register(selector, SelectionKey.OP_CONNECT);
 

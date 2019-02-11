@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 
 /**
+ * 切面
+ *
  * Created by panjiannan on 2018/7/30.
  */
 @Aspect
@@ -22,11 +24,13 @@ public class LogAspect {
         System.err.println("LogAspect init $$$$$$$");
     }
 
+    //切点
     @Pointcut(value = "execution(public * com.maijia.mq.webtest.controllers..*(..))")
     public void logPoint() {
 
     }
 
+    //advisor
     @Before(value = "logPoint()")
     public void before() {
         System.out.println("准备执行方法！");

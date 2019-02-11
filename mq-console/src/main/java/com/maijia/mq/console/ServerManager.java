@@ -1,12 +1,5 @@
 package com.maijia.mq.console;
 
-import com.maijia.mq.consumer.DefaultConsumer;
-import com.maijia.mq.consumer.LevelDBConsumer;
-import com.maijia.mq.consumer.RedisConsumer;
-import com.maijia.mq.producer.DefaultProducer;
-import com.maijia.mq.producer.LevelDBProducer;
-import com.maijia.mq.producer.RedisProducer;
-import com.maijia.mq.util.ConstantUtils;
 import org.apache.log4j.Logger;
 
 import java.util.HashMap;

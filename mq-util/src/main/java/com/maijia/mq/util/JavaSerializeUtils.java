@@ -10,6 +10,9 @@ import java.io.*;
  */
 public class JavaSerializeUtils {
 
+    private JavaSerializeUtils() {
+    }
+
     public static byte[] serialize(Serializable obj) throws IOException {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(os);

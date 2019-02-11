@@ -1,7 +1,7 @@
 package com.maijia.mq.rpc;
 
 import com.alibaba.fastjson.JSONObject;
-import com.maijia.mq.util.ConstantUtils;
+import com.maijia.mq.constant.CommonConstant;
 import com.maijia.mq.util.HessianSerializeUtils;
 import org.apache.log4j.Logger;
 
@@ -48,7 +48,7 @@ public class RpcFramework {
      * @throws Exception
      */
     public static void export(Class interfaceClass, Object serviceImpl, String version) throws Exception {
-        export(interfaceClass, serviceImpl, ConstantUtils.NIO_RPC_PORT, version);
+        export(interfaceClass, serviceImpl, CommonConstant.NIO_RPC_PORT, version);
     }
 
     /**
@@ -104,7 +104,7 @@ public class RpcFramework {
      */
     @SuppressWarnings("unchecked")
     public static <T> T refer(final Class<T> interfaceClass, final String host,  final String version) {
-       return refer(interfaceClass, host, ConstantUtils.NIO_RPC_PORT, version);
+       return refer(interfaceClass, host, CommonConstant.NIO_RPC_PORT, version);
     }
 
     /**
@@ -133,6 +133,10 @@ public class RpcFramework {
             throw new IllegalArgumentException(String.format("Invalid port %d", port));
         }
         LOGGER.info(String.format("Start get remote service %s(version:%s) from server %s:%d", interfaceClass.getName(), version, host, port));
+
+        // todo 消费方注册到zk上
+        // zk.client();
+
 
         //使用JDK[代理模式], 返回接口的代理
         return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(), new Class<?>[]{interfaceClass}, (proxy, method, arguments) -> {

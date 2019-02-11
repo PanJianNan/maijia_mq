@@ -90,6 +90,12 @@
         <property name="defaultExpiration" value="3600"/>
         <!-- 是否事务提交 -->
         <property name="transactionAware" value="false"/>
+        <!-- 多个缓存有效期，一般的工程可以省略此项 -->
+        <property name="expires">
+            <map>
+                <entry key="maijia_mq" value="3600"/>
+            </map>
+        </property>
     </bean>
 
     <bean id="redisCacheImpl" class="com.maijia.mq.cahce.redis.RedisCacheImpl">

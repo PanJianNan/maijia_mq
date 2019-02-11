@@ -1,5 +1,7 @@
 package com.maijia.mq.util;
 
+import com.maijia.mq.constant.CommonConstant;
+
 /**
  * NettyUtils
  *
@@ -8,6 +10,9 @@ package com.maijia.mq.util;
  */
 public class NettyUtils {
 
+    private NettyUtils() {
+    }
+
     /**
      * 将int转为高字节在前，低字节在后的2字节数组
      *
@@ -15,7 +20,7 @@ public class NettyUtils {
      * @return byte[] 转化后的结果
      */
     public static byte[] intToBytes(int n) {
-        if (n < 0 || n > ConstantUtils.MAX_TWO_BYTES) {
+        if (n < 0 || n > CommonConstant.MAX_TWO_BYTES) {
             throw new IllegalArgumentException("被转化整数值需要在0和32767之间");
         }
         byte[] b = new byte[2];

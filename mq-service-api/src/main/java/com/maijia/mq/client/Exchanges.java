@@ -1,8 +1,8 @@
 package com.maijia.mq.client;
 
+import com.maijia.mq.constant.CommonConstant;
 import com.maijia.mq.rpc.RpcFramework;
 import com.maijia.mq.service.IExchangeService;
-import com.maijia.mq.util.ConstantUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -26,7 +26,7 @@ public class Exchanges {
     public static Map<String, Set<String>> exchangeMap = new HashMap<>();
 
     static {
-        init(MqConfig.host, ConstantUtils.NIO_RPC_PORT);
+        init(MqClientConfig.HOST, CommonConstant.NIO_RPC_PORT);
     }
 
     public static boolean contains(String exchangeName, String queueName) {
@@ -64,6 +64,13 @@ public class Exchanges {
         exchangeMap = serverExchangeMap;
 
         init = true;
+    }
+
+    public static void reset() {
+        IExchangeService exchangeService = RpcFramework.refer(IExchangeService.class, MqClientConfig.HOST, CommonConstant.NIO_RPC_PORT, RpcFramework.DEFAULT_VERSION);
+
+        Map<String, Set<String>> serverExchangeMap = exchangeService.getExchangeMap();
+        exchangeMap = serverExchangeMap;
     }
 
 

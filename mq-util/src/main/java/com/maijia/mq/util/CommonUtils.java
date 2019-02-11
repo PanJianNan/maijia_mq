@@ -8,6 +8,9 @@ package com.maijia.mq.util;
  */
 public class CommonUtils {
 
+    private CommonUtils() {
+    }
+
     public static boolean isIp(String ip) {//判断是否是一个IP
         if ("localhost".equals(ip)) {
             return true;

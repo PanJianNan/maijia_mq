@@ -1,11 +1,11 @@
 package com.maijia.mq.client;
 
+import com.maijia.mq.constant.CommonConstant;
 import com.maijia.mq.rpc.RpcFramework;
 import com.maijia.mq.service.ICacheMqService;
 import com.maijia.mq.service.IFastMqService;
 import com.maijia.mq.service.IFileMqService;
 import com.maijia.mq.service.IMqService;
-import com.maijia.mq.util.ConstantUtils;
 
 import java.io.IOException;
 
@@ -35,7 +35,7 @@ public class ConnectionFactory {
     public static final FactoryMode DEFAULT_MODE = FactoryMode.FILE;
 
     private String host = DEFAULT_HOST;
-    private int port = ConstantUtils.NIO_RPC_PORT;
+    private int port = CommonConstant.NIO_RPC_PORT;
     private FactoryMode mode = DEFAULT_MODE;
     private IMqService mqService;
 
@@ -84,18 +84,18 @@ public class ConnectionFactory {
         switch (mode) {
             case FAST:
                 mqService = RpcFramework.refer(IFastMqService.class, host, port, defaultVersion);
-                mqRequestPort = ConstantUtils.FAST_MQ_LISTEN_PORT;
+                mqRequestPort = CommonConstant.FAST_MQ_LISTEN_PORT;
                 break;
             case CACHE:
                 mqService = RpcFramework.refer(ICacheMqService.class, host, port, defaultVersion);
-                mqRequestPort = ConstantUtils.CACHE_MQ_LISTEN_PORT;
+                mqRequestPort = CommonConstant.CACHE_MQ_LISTEN_PORT;
                 break;
             case FILE:
                 mqService = RpcFramework.refer(IFileMqService.class, host, port, defaultVersion);
-                mqRequestPort = ConstantUtils.FILE_MQ_LISTEN_PORT;
+                mqRequestPort = CommonConstant.FILE_MQ_LISTEN_PORT;
                 break;
             default:
-                mqRequestPort = ConstantUtils.FILE_MQ_LISTEN_PORT;
+                mqRequestPort = CommonConstant.FILE_MQ_LISTEN_PORT;
                 mqService = RpcFramework.refer(IFileMqService.class, host, port, defaultVersion);
                 break;
         }

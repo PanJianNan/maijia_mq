@@ -1,6 +1,6 @@
 package com.maijia.mq.rpc;
 
-import com.maijia.mq.util.ConstantUtils;
+import com.maijia.mq.constant.CommonConstant;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.springframework.util.Assert;
@@ -12,13 +12,13 @@ public class RpcFrameworkTest {
     //server
     @Test
     public void export() throws Exception {
-        RpcFramework.export(A.class, new B().getClass(), ConstantUtils.NIO_RPC_PORT, "1.0.0");
+        RpcFramework.export(A.class, new B().getClass(), CommonConstant.NIO_RPC_PORT, "1.0.0");
     }
 
     //client
     @Test
     public void refer() throws Exception {
-        A a = RpcFramework.refer(A.class, "127.0.0.1", ConstantUtils.NIO_RPC_PORT, "1.0.0");
+        A a = RpcFramework.refer(A.class, "127.0.0.1", CommonConstant.NIO_RPC_PORT, "1.0.0");
         Assert.isTrue(!a.print(""));
         Assert.isTrue(a.print("hello 大兄弟"));
     }

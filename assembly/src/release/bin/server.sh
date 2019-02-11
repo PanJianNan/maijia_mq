@@ -14,7 +14,7 @@ done
 
 export CLASSPATH=$CLASSPATH
 
-check() {
+function check() {
     ERROR=0
     if [ "-1" -eq $ERROR ]; then
         echo
@@ -22,7 +22,7 @@ check() {
     fi
 }
 
-start() {
+function start() {
     echo "JAVA_HOME=$JAVA_HOME"
     echo "CLASSPATH=$CLASSPATH"
     echo "MAIN_CALSS=$MAIN_CLASS"
@@ -32,19 +32,19 @@ start() {
     echo "$APP_NAME started success."
 }
 
-stop() {
+function stop() {
     echo "Stopping $APP_NAME ..."
     kill -9 `ps -ef|grep $APP_NAME|grep -v grep|grep -v stop|awk '{print $2}'`
 }
 
 case "$1" in
-    start)
+    "start")
         start
         ;;
-    stop)
+    "stop")
         stop
         ;;
-    restart)
+    "restart")
         stop
         start
         ;;

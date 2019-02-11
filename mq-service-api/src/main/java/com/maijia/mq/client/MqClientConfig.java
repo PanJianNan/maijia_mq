@@ -1,8 +1,8 @@
 package com.maijia.mq.client;
 
 import com.maijia.mq.util.CommonUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
@@ -11,31 +11,34 @@ import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * MqConfig
+ * MqClientConfig
  *
  * @author panjn
  * @date 2019/1/23
  */
-public class MqConfig {
+public class MqClientConfig {
 
-    private static final Logger LOGGER = Logger.getLogger(MqConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MqClientConfig.class);
 
-    public static String host;
+    public static String HOST;
+    public static final String ZK_CONNECT;
 
     static {
         //加载配置文件
-        InputStream inputStream = MqConfig.class.getClassLoader().getResourceAsStream("mjmq.properties");
+        InputStream inputStream = MqClientConfig.class.getClassLoader().getResourceAsStream("mjmq.properties");
         if (inputStream == null) {
-//            LOGGER.warn("missing mjmq.properties");
             throw new RuntimeException("cant't find mjmq.properties");
         } else {
             try (InputStream in = new BufferedInputStream(inputStream)) {
-                Properties p = new Properties();
-                p.load(in);
-                host = p.getProperty("host");
-                if (host == null || !CommonUtils.isIp(host)) {
-                    throw new RuntimeException("please set 'host' correctly in mjmq.properties");
-                }
+                Properties prop = new Properties();
+                prop.load(in);
+
+//                HOST = prop.getProperty("host");
+//                if (HOST == null || !CommonUtils.isIp(HOST)) {
+//                    throw new RuntimeException("please set 'host' correctly in mjmq.properties");
+//                }
+
+                ZK_CONNECT = prop.getProperty("zookeeper.connect", "localhost:2181");
             } catch (FileNotFoundException e) {
 //                LOGGER.warn("missing mjmq.properties");
                 throw new RuntimeException("cant't find mjmq.properties");

@@ -1,8 +1,8 @@
 package com.maijia.mq.console;
 
+import com.maijia.mq.constant.CommonConstant;
 import com.maijia.mq.consumer.Consumer;
 import com.maijia.mq.domain.Message;
-import com.maijia.mq.util.ConstantUtils;
 import org.apache.log4j.Logger;
 
 import java.io.ByteArrayOutputStream;
@@ -45,7 +45,7 @@ public class NioMonitorThread extends Thread {
             //3. 设置服务器通道为非阻塞模式
             ssChannel.configureBlocking(false);
             //4. 绑定监听端口
-            ssChannel.bind(new InetSocketAddress(ConstantUtils.NIO_MSG_TRANSFER_PORT));
+            ssChannel.bind(new InetSocketAddress(CommonConstant.NIO_MSG_TRANSFER_PORT));
             //5. 将通道注册到选择器上, 并且指定“监听接收事件”
             ssChannel.register(selector, SelectionKey.OP_ACCEPT);
             //6. 轮询式的获取选择器上已经“准备就绪”的事件

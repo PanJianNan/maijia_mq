@@ -37,7 +37,7 @@ public class TestController {
 
     @RequestMapping(value = "cache")
     public String cacheTest() {
-        String cacheKey = ConstantUtils.CACHE_KEY_PREFIX + "test_message:queue2";
+        String cacheKey = CommonConstant.CACHE_KEY_PREFIX + "test_message:queue2";
         List<String> strings = new ArrayList<>();
         strings.add("abc");
         strings.add("123");
@@ -60,7 +60,7 @@ public class TestController {
 
     @RequestMapping(value = "produce")
     public String produce(String msg) {
-        String cacheKey = ConstantUtils.CACHE_KEY_PREFIX + "test_message:queue2";
+        String cacheKey = CommonConstant.CACHE_KEY_PREFIX + "test_message:queue2";
         cacheService.lPush(cacheKey, new String("i am msg5555"));
         defaultProducer.produce("pjn", msg);
         return "produce success";

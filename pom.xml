@@ -38,15 +38,17 @@
         <version.netty>4.1.32.Final</version.netty>
         <version.servlet-api>4.0.1</version.servlet-api>
         <version.junit>4.0</version.junit>
-        <version.spring>4.0.4.RELEASE</version.spring>
+        <version.spring>4.3.4.RELEASE</version.spring>
         <version.aspectjweaver>1.9.1</version.aspectjweaver>
         <version.slf4j-log4j12>1.7.9</version.slf4j-log4j12>
         <version.commons-lang3>3.7</version.commons-lang3>
         <version.fastjson>1.2.9</version.fastjson>
         <version.log4j>1.2.9</version.log4j>
-        <version.spring-data-redis>1.6.0.RELEASE</version.spring-data-redis>
-        <version.jedis>2.7.3</version.jedis>
+        <version.spring-data-redis>1.7.5.RELEASE</version.spring-data-redis>
+        <version.jedis>2.8.1</version.jedis>
         <version.sofa-hessian>4.0.1</version.sofa-hessian>
+        <version.zookeeper>3.4.13</version.zookeeper>
+        <version.curator>4.0.0</version.curator>
     </properties>
 
     <dependencyManagement>
@@ -198,6 +200,16 @@
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>hessian</artifactId>
                 <version>${version.sofa-hessian}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.zookeeper</groupId>
+                <artifactId>zookeeper</artifactId>
+                <version>${version.zookeeper}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-recipes</artifactId>
+                <version>${version.curator}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
