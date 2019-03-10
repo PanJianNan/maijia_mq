@@ -1,9 +1,10 @@
 package com.maijia.mq.leveldb;
 
 import com.maijia.mq.domain.Message;
-import org.apache.log4j.Logger;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.WriteBatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -105,7 +106,7 @@ public class QueueMiddleComponent {
      */
     private int pageSize = DEFAULT_PAGE_SIZE;
 
-    protected final Logger logger = Logger.getLogger(this.getClass());
+    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     protected final LevelDBPersistenceAdapter adapter;
     /**

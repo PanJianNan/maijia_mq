@@ -1,6 +1,7 @@
 package com.maijia.mq.client;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -13,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class AbstractMessageAcceptor {
 
-    protected final Logger logger = Logger.getLogger(this.getClass());
+    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     protected void fire() {
         //创建负责消费的线程
@@ -47,7 +48,7 @@ public abstract class AbstractMessageAcceptor {
                 TimeUnit.MINUTES.sleep(1L);
                 retryLink();
             } catch (InterruptedException e1) {
-                logger.error(e1);
+                logger.error(e1.getMessage(), e1);
             }
         }
     }

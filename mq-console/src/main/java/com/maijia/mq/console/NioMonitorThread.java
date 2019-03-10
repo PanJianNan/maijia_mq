@@ -3,7 +3,8 @@ package com.maijia.mq.console;
 import com.maijia.mq.constant.CommonConstant;
 import com.maijia.mq.consumer.Consumer;
 import com.maijia.mq.domain.Message;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
@@ -25,7 +26,7 @@ import java.util.Iterator;
  */
 public class NioMonitorThread extends Thread {
 
-    private static final Logger LOGGER = Logger.getLogger(NioMonitorThread.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NioMonitorThread.class);
 
     private Consumer consumer;
 

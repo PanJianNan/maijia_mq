@@ -24,6 +24,7 @@ public class FastPublishMsgAcceptor extends AbstractMessageAcceptor {
 //    String host = "192.168.102.137";
     String host = "127.0.0.1";
 
+    @Override
     @PostConstruct
     public void fire() {
         super.fire();

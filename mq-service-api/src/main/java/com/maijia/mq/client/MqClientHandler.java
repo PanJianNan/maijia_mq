@@ -10,7 +10,8 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.EventLoopGroup;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 客户端端消息请求处理Handler
@@ -20,7 +21,7 @@ import org.apache.log4j.Logger;
  */
 public class MqClientHandler extends ChannelInboundHandlerAdapter {
 
-	private static final Logger LOGGER = Logger.getLogger(MqClientHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MqClientHandler.class);
 
 	private MqClient mqClient;
 

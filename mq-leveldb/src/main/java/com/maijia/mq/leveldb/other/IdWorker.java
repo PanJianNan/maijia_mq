@@ -1,6 +1,7 @@
 package com.maijia.mq.leveldb.other;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 系统编码生成器
@@ -10,7 +11,7 @@ import org.apache.log4j.Logger;
  */
 public class IdWorker {
 
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final long workerId;
     private final static long twepoch = 1421976968066L;

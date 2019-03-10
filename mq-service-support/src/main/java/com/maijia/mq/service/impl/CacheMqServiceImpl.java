@@ -7,7 +7,8 @@ import com.maijia.mq.core.ExchangeCenter;
 import com.maijia.mq.producer.RedisProducer;
 import com.maijia.mq.rpc.MqListenThread;
 import com.maijia.mq.service.ICacheMqService;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -24,7 +25,7 @@ import java.io.IOException;
 @Service
 public class CacheMqServiceImpl extends AbstractMqService implements ICacheMqService {
 
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Resource
     private RedisProducer redisProducer;

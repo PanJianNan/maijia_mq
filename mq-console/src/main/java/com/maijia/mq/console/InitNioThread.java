@@ -8,7 +8,8 @@ import com.maijia.mq.producer.DefaultProducer;
 import com.maijia.mq.producer.LevelDBProducer;
 import com.maijia.mq.producer.RedisProducer;
 import com.maijia.mq.constant.CommonConstant;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -25,7 +26,7 @@ import javax.annotation.Resource;
 @Component
 public class InitNioThread {
 
-    private static final Logger LOGGER = Logger.getLogger(InitNioThread.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InitNioThread.class);
 
     @Resource
     private ApplicationContextHelper applicationContextHelper;

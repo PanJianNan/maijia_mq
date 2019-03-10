@@ -1,11 +1,11 @@
 package com.maijia.mq.console;
 
 import com.alibaba.fastjson.JSONObject;
-import com.maijia.mq.AckPingPong;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleStateEvent;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 服务端端Idler Handler
@@ -15,7 +15,7 @@ import org.apache.log4j.Logger;
  */
 public class MqServerIdleHandler extends ChannelInboundHandlerAdapter {
 
-	private static final Logger LOGGER = Logger.getLogger(MqServerIdleHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MqServerIdleHandler.class);
 
 	@Override
 	public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {

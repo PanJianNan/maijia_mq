@@ -4,7 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.maijia.mq.consumer.Consumer;
 import com.maijia.mq.domain.Message;
 import com.maijia.mq.producer.Producer;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -23,7 +24,7 @@ import java.util.Map;
  */
 public class MqListenThread extends Thread {
 
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private ServerSocket serverSocket;
 

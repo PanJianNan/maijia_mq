@@ -4,7 +4,8 @@ import com.maijia.mq.AckPingPong;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleStateEvent;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 客户端Idler Handler
@@ -14,7 +15,7 @@ import org.apache.log4j.Logger;
  */
 public class MqClientIdleHandler extends ChannelInboundHandlerAdapter {
 
-	private static final Logger LOGGER = Logger.getLogger(MqClientIdleHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MqClientIdleHandler.class);
 
 	@Override
 	public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {

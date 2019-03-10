@@ -2,7 +2,8 @@ package com.maijia.mq.rpc;
 
 import com.alibaba.fastjson.JSONObject;
 import com.maijia.mq.util.HessianSerializeUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -24,7 +25,7 @@ import java.util.Iterator;
  */
 public class RpcServerReactor implements Runnable {
 
-    private static final Logger LOGGER = Logger.getLogger(RpcServerReactor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RpcServerReactor.class);
 
     private int port;
 

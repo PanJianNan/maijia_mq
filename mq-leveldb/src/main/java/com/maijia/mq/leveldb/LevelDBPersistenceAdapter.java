@@ -3,8 +3,8 @@ package com.maijia.mq.leveldb;
 import com.maijia.mq.domain.Message;
 import com.maijia.mq.leveldb.other.IdWorker;
 import com.maijia.mq.util.HessianSerializeUtils;
-import org.apache.log4j.Logger;
 import org.iq80.leveldb.*;
+import org.slf4j.*;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -56,7 +56,7 @@ public class LevelDBPersistenceAdapter implements Closeable {
 
     protected final IdWorker idWorker;
 
-    protected final Logger logger = Logger.getLogger(this.getClass());
+    protected final org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public LevelDBPersistenceAdapter() {
         idWorker = new IdWorker(1);
@@ -202,6 +202,7 @@ public class LevelDBPersistenceAdapter implements Closeable {
         }
     }
 
+    @Override
     public synchronized void close() throws IOException {
         if (db == null) {
             return;
@@ -240,7 +241,7 @@ public class LevelDBPersistenceAdapter implements Closeable {
         MessageWrapper wrapper = new MessageWrapper(nextId(), message);
         put(wrapper.getMsgId(), wrapper);
         if (logger.isDebugEnabled()) {
-            logger.debug(new StringBuilder("saved msg:").append(wrapper.getMsgId()));
+            logger.debug("saved msg:" + wrapper.getMsgId());
         }
         return wrapper.getMsgId();
     }
@@ -252,7 +253,7 @@ public class LevelDBPersistenceAdapter implements Closeable {
             String[] ids = toIds(list);
             deleteById(ids);
             if (logger.isDebugEnabled()) {
-                logger.debug(new StringBuilder("deleted keys:").append(ids));
+                logger.debug("deleted keys:" + ids);
             }
         }
     }

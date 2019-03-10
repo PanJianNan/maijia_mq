@@ -13,14 +13,15 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * https://blog.csdn.net/wocjy/article/details/78661464
  */
 public class MqServerThread implements Runnable {
 
-    private static final Logger LOGGER = Logger.getLogger(MqServerThread.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MqServerThread.class);
 
     private int port;
     private Consumer consumer;

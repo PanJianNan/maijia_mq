@@ -9,7 +9,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
@@ -21,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class MqClient {
 
-    private static final Logger LOGGER = Logger.getLogger(MqClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MqClient.class);
 
     private String queueName;
     private MQConsumer mqConsumer;

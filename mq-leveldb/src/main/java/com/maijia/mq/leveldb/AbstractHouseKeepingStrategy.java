@@ -1,7 +1,8 @@
 package com.maijia.mq.leveldb;
 
-import org.apache.log4j.Logger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * AbstractHouseKeepingStrategy
@@ -13,7 +14,7 @@ public abstract class AbstractHouseKeepingStrategy implements IHouseKeepingStrat
 
     protected final QueueMiddleComponent adapter;
 
-    protected final Logger logger = Logger.getLogger(this.getClass());
+    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public AbstractHouseKeepingStrategy(QueueMiddleComponent adapter) {
         this.adapter = adapter;

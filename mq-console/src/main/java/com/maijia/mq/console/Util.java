@@ -1,6 +1,7 @@
 package com.maijia.mq.console;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +27,7 @@ public class Util {
     /**
      * 日志
      */
-    private static final Logger LOGGER = Logger.getLogger(Util.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Util.class);
 
     /**
      * 获取绝对路径(项目路径中不可以有空格)

@@ -3,7 +3,8 @@ package com.maijia.mq.rpc;
 import com.alibaba.fastjson.JSONObject;
 import com.maijia.mq.constant.CommonConstant;
 import com.maijia.mq.util.HessianSerializeUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -32,7 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class RpcFramework {
 
-    private static final Logger LOGGER = Logger.getLogger(RpcFramework.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RpcFramework.class);
 
     public static final String DEFAULT_VERSION = "1.0.0";
 
@@ -168,7 +169,7 @@ public class RpcFramework {
                         SelectionKey selectionKey = iterator.next();
                         if (selectionKey.isValid()) {
                             if (selectionKey.isConnectable()) {
-                                LOGGER.debug(selectionKey.attachment());
+                                LOGGER.debug(String.valueOf(selectionKey.attachment()));
                                 if (socketChannel.isConnectionPending()) {
                                     //等待连接建立
                                     socketChannel.finishConnect();
@@ -195,7 +196,7 @@ public class RpcFramework {
                                     }
                                 }
                             } else if (selectionKey.isReadable()) {
-                                LOGGER.debug(selectionKey.attachment());
+                                LOGGER.debug(String.valueOf(selectionKey.attachment()));
                                 ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
                                 byte[] totalBytes = new byte[1024];//存放read到的数据
                                 int readByteNum = 0;

@@ -1,7 +1,8 @@
 package com.maijia.mq.rpc;
 
 import com.alibaba.fastjson.JSONObject;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -14,7 +15,7 @@ import java.net.Socket;
  */
 public class HeartBeatThread extends Thread {
 
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private Socket socket;
 

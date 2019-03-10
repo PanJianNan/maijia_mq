@@ -4,7 +4,8 @@ import com.maijia.mq.client.ExchangeType;
 import com.maijia.mq.leveldb.LevelDBPersistenceAdapter;
 import com.maijia.mq.producer.Producer;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -27,7 +28,7 @@ import java.util.Set;
 @Component
 public class ExchangeCenter {
 
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private static final String LEVEL_DB_EXCHANGES_KEY = "system:mjmq-server:exchange-map";
 

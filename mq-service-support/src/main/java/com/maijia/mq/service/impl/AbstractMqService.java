@@ -7,7 +7,8 @@ import com.maijia.mq.core.ExchangeCenter;
 import com.maijia.mq.producer.Producer;
 import com.maijia.mq.rpc.MqListenThread;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -20,7 +21,7 @@ import java.net.ServerSocket;
  */
 public abstract class AbstractMqService {
 
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     /**
      * 创建ServerSocket，同时为其绑定一个消息的监听线程

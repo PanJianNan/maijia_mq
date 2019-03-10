@@ -2,7 +2,8 @@ package com.maijia.mq.leveldb;
 
 import com.maijia.mq.domain.Message;
 import com.maijia.mq.leveldb.strategy.LimitReadHouseKeepingStrategy;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
@@ -58,7 +59,7 @@ public class LevelDBQueue {
     /** whether connect LevelDB */
     private volatile boolean connect = false;
 
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(LevelDBQueue.class);
 
     private IHouseKeepingStrategy houseKeepingStrategy;
 
@@ -154,7 +155,7 @@ public class LevelDBQueue {
                 notFull.signal();
             }
         } catch (PersistenceException e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         } finally {
             putLock.unlock();
         }
@@ -196,7 +197,7 @@ public class LevelDBQueue {
                 }
             }
         } catch (PersistenceException e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         } finally {
             putLock.unlock();
         }
@@ -214,7 +215,7 @@ public class LevelDBQueue {
         final AtomicInteger count = this.count;
         final ReentrantLock takeLock = this.takeLock;
         takeLock.lockInterruptibly();
-        logger.info("remain msg count: " + queueMiddleComponent.count());
+        LOGGER.info("remain msg count: " + queueMiddleComponent.count());
         try {
             while (count.get() == 0) {
                 notEmpty.await();
@@ -225,7 +226,7 @@ public class LevelDBQueue {
                 notEmpty.signal();
             }
         } catch (PersistenceException e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         } finally {
             takeLock.unlock();
         }
@@ -253,10 +254,11 @@ public class LevelDBQueue {
             }
             x = queueMiddleComponent.pop();
             c = count.getAndDecrement();
-            if (c > 1)
+            if (c > 1) {
                 notEmpty.signal();
+            }
         } catch (PersistenceException e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         } finally {
             takeLock.unlock();
         }
@@ -286,7 +288,7 @@ public class LevelDBQueue {
                 }
             }
         } catch (PersistenceException e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         } finally {
             takeLock.unlock();
         }
@@ -381,7 +383,7 @@ public class LevelDBQueue {
                 notFull.signal();
             }
         } catch (PersistenceException e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         } finally {
             putLock.unlock();
         }
@@ -404,7 +406,7 @@ public class LevelDBQueue {
         try {
             msg = queueMiddleComponent.pop();
         } catch (PersistenceException e) {
-            logger.error("pop message error", e);
+            LOGGER.error("pop message error", e);
         }
         if (msg != null) {
             return msg;
@@ -419,7 +421,7 @@ public class LevelDBQueue {
                     locker.wait(timeout);
                 }
             } catch (InterruptedException e) {
-                logger.error(e.getMessage(), e);
+                LOGGER.error(e.getMessage(), e);
             }
         }
 
@@ -434,7 +436,7 @@ public class LevelDBQueue {
         try {
             msg = queueMiddleComponent.pop();
         } catch (PersistenceException e) {
-            logger.error("pop message error", e);
+            LOGGER.error("pop message error", e);
         }
 
         return msg;
@@ -462,7 +464,7 @@ public class LevelDBQueue {
                 notFull.signal();
             }
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         } finally {
             fullyUnlock();
         }

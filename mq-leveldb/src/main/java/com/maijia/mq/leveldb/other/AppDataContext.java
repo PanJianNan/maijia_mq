@@ -1,6 +1,7 @@
 package com.maijia.mq.leveldb.other;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -16,11 +17,11 @@ import java.util.Properties;
  */
 public class AppDataContext {
 
-    public static final String SYSTEM_PROPERTY_PATH = "ec.appdata.path";
+    public static final String SYSTEM_PROPERTY_PATH = "mq.appdata.path";
 
-    public static final String SYSTEM_PROPERTY_APPDATA_NAME = "ec.appdata.name";
+    public static final String SYSTEM_PROPERTY_APPDATA_NAME = "mq.appdata.name";
 
-    public static final String PATH_NAME = ".ecapp";
+    public static final String PATH_NAME = ".mqapp";
 
     private static AppDataContext self;
 
@@ -28,7 +29,7 @@ public class AppDataContext {
 
     File path;
 
-    private final Logger logger = Logger.getLogger(this.getClass());
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     AppDataContext() {
     }
@@ -54,11 +55,13 @@ public class AppDataContext {
     }
 
     private String filterPath(String path) {
-        if (isEmpty(path))
+        if (isEmpty(path)) {
             return path;
+        }
 
-        if (path.substring(path.length() - 1, path.length()).equals(File.separator))
+        if (path.substring(path.length() - 1, path.length()).equals(File.separator)) {
             return path;
+        }
 
         return new StringBuilder(path).append(File.separator).toString();
 
@@ -70,7 +73,7 @@ public class AppDataContext {
 
     void init() throws IOException {
         String dataPath = getDataPath();
-        logger.info(new StringBuilder("load ec-app-data:path:").append(dataPath));
+        logger.info("load ec-app-data:path:{}", dataPath);
         path = new File(dataPath);
         if (!path.exists()) {
             path.mkdirs();

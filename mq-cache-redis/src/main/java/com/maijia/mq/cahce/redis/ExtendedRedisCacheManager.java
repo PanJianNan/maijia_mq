@@ -1,7 +1,8 @@
 package com.maijia.mq.cahce.redis;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.data.redis.cache.RedisCache;
 import org.springframework.data.redis.cache.RedisCacheManager;
@@ -23,7 +24,7 @@ import java.util.regex.Pattern;
  */
 public class ExtendedRedisCacheManager extends RedisCacheManager {
 
-    private static final Logger LOGGER = Logger.getLogger(ExtendedRedisCacheManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExtendedRedisCacheManager.class);
 
     private static final ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName("JavaScript");
 

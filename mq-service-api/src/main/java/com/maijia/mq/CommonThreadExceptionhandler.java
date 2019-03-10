@@ -1,6 +1,7 @@
 package com.maijia.mq;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * CommonThreadExceptionhandler
@@ -10,7 +11,7 @@ import org.apache.log4j.Logger;
  */
 public class CommonThreadExceptionhandler implements Thread.UncaughtExceptionHandler {
 
-    private static final Logger LOGGER = Logger.getLogger(CommonThreadExceptionhandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommonThreadExceptionhandler.class);
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
